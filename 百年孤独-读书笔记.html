@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>百年孤独 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #8b3a2e;
+    --accent-soft: #f4e4dc;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(255,200,120,.25), transparent 60%), linear-gradient(180deg, #2b1a14 0%, #6b3a28 100%);
+    --hero-text: #f3e8d4;
+    --hero-subtitle: rgba(243,232,212,.72);
+    --hero-meta: rgba(243,232,212,.78);
+    --hero-accent: #e6b86a;
+    --hero-divider: rgba(243,232,212,.18);
+    --progress-gradient: linear-gradient(90deg, #8b3a2e, #e6b86a);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(255,180,110,.08), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,150,90,.06), transparent 40%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans); font-size: 12px; letter-spacing: .4em;
+    color: var(--hero-accent); text-transform: uppercase;
+    margin-bottom: 20px; position: relative;
+  }
+  .hero h1 {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em; margin: 0 0 20px;
+    line-height: 1.2; color: var(--hero-text); position: relative;
+  }
+  .hero .subtitle {
+    font-family: var(--serif); font-style: italic;
+    font-size: 17px; color: var(--hero-subtitle);
+    letter-spacing: .1em; margin-bottom: 36px; position: relative;
+  }
+  .hero .meta {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px 22px; font-family: var(--sans); font-size: 13px;
+    color: var(--hero-meta); padding-top: 20px;
+    border-top: 1px solid var(--hero-divider); position: relative;
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1440px; margin: 0 auto;
+    padding: 48px 32px 96px;
+    display: grid; grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px; align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky; top: 24px; align-self: start;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+    padding-right: 16px; border-right: 1px solid var(--border);
+    font-family: var(--sans); font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px; letter-spacing: .3em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block; padding: 6px 0 6px 22px;
+    color: var(--text-soft); text-decoration: none;
+    position: relative; line-height: 1.5; transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc;
+    position: absolute; left: 0;
+    color: var(--text-muted);
+    font-size: 11px; font-weight: 500; letter-spacing: .05em;
+    top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif); font-size: 26px; font-weight: 700;
+    color: var(--text); margin: 0 0 28px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em; position: relative;
+  }
+  h2::after {
+    content: ""; position: absolute; left: 0; bottom: -2px;
+    width: 60px; height: 2px; background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block; font-family: var(--sans);
+    font-size: 13px; color: var(--accent);
+    letter-spacing: .2em; margin-right: 14px;
+    font-weight: 500; vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif); font-size: 19px; font-weight: 600;
+    color: var(--text); margin: 36px 0 14px; padding-left: 14px;
+    border-left: 3px solid var(--gold); line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans); font-size: 11px;
+    color: var(--accent); letter-spacing: .2em;
+    display: block; margin-bottom: 4px; font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead { font-size: 18.5px; color: var(--text); line-height: 1.9; }
+
+  .note {
+    font-family: var(--sans); font-size: 13px;
+    color: var(--text-muted); padding: 14px 18px;
+    background: #f5f1e5; border-radius: 4px;
+    margin: 16px 0; line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  /* 人物关系图 */
+  .cast-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 32px 24px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+    scroll-margin-top: 24px;
+  }
+  .cast-legend {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    font-family: var(--sans); font-size: 12.5px;
+    color: var(--text-soft);
+    padding: 14px 18px;
+    background: #f7f3ea; border-radius: 6px;
+    margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block; width: 12px; height: 12px;
+    border-radius: 3px; vertical-align: middle; margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px; letter-spacing: .3em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .cast-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .cast-node {
+    flex: 0 0 auto; min-width: 180px;
+    padding: 12px 16px;
+    background: #faf6ec;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name {
+    font-family: var(--serif); font-weight: 600;
+    font-size: 15px; color: var(--text); line-height: 1.3;
+  }
+  .cast-name .aka {
+    font-weight: 400; font-size: 12px;
+    color: var(--text-muted); margin-left: 4px;
+  }
+  .cast-role {
+    font-family: var(--sans); font-size: 12.5px;
+    color: var(--text-soft); margin-top: 5px; line-height: 1.55;
+  }
+  .cast-note {
+    font-family: var(--sans); font-size: 12px;
+    color: var(--text-muted); margin-top: 4px; font-style: italic;
+  }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px;
+    position: relative; line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6"; position: absolute; left: 4px; top: 10px;
+    color: var(--gold); font-size: 10px;
+  }
+
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06);
+  }
+  .chapter h3 {
+    margin: 0 0 16px; padding: 0 0 12px;
+    border-left: none; border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans); font-size: 11.5px;
+    letter-spacing: .2em; color: var(--accent);
+    text-transform: uppercase; margin-top: 14px; margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote;
+    padding: 22px 24px 22px 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; margin-bottom: 14px;
+    position: relative;
+    font-family: var(--serif);
+    font-size: 16.5px; line-height: 1.9;
+    color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute; left: 20px; top: 22px;
+    font-family: var(--serif); font-style: italic;
+    font-size: 28px; color: var(--accent); font-weight: 600;
+  }
+  .quotes .src {
+    display: block; font-family: var(--sans);
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 8px; letter-spacing: .05em;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px; }
+  .tag {
+    display: inline-block; padding: 4px 12px;
+    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--sans); font-size: 12px;
+    border-radius: 999px; letter-spacing: .05em;
+  }
+
+  hr {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  footer {
+    text-align: center; padding: 40px 24px 60px;
+    color: var(--text-muted);
+    font-family: var(--sans); font-size: 12.5px;
+    letter-spacing: .1em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif); font-size: 22px;
+    color: var(--accent); letter-spacing: .3em;
+    margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent); color: #fff;
+    border: none; cursor: pointer; font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif); font-size: 3.4em;
+    float: left; line-height: .9;
+    padding: 6px 10px 0 0;
+    color: var(--accent); font-weight: 700;
+  }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>百年孤独</h1>
+  <div class="subtitle">Cien años de soledad — 一部被飓风从世上抹去的家族史诗</div>
+  <div class="meta">
+    <span><strong>类型</strong>虚构 · 魔幻现实主义</span>
+    <span><strong>作者</strong>加西亚·马尔克斯</span>
+    <span><strong>译者</strong>范晔</span>
+    <span><strong>字数</strong>约 21 万</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物关系与命名谱系</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与故事梗概</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">建村、冰块与镜屋之梦</a></li>
+          <li><a href="#c2">失眠症、外来者与第一任里正</a></li>
+          <li><a href="#c3">炼金、爱情与第一次婚礼</a></li>
+          <li><a href="#c4">神迹、死亡与疯狂</a></li>
+          <li><a href="#c5">战争爆发与上校诞生</a></li>
+          <li><a href="#c6">阿尔卡蒂奥的暴政与上校之死</a></li>
+          <li><a href="#c7">三十二场战争与虚无</a></li>
+          <li><a href="#c8">丽贝卡的幽居与何塞·阿尔卡蒂奥之死</a></li>
+          <li><a href="#c9">阿玛兰妲的寿衣</a></li>
+          <li><a href="#c10">美人儿蕾梅黛丝与香蕉公司</a></li>
+          <li><a href="#c11">香蕉公司与工人大罢工</a></li>
+          <li><a href="#c12">四年十一个月零两天的雨</a></li>
+          <li><a href="#c13">乌尔苏拉的失明与家族洞察</a></li>
+          <li><a href="#c14">梅梅、马乌里肖与黄蝴蝶</a></li>
+          <li><a href="#c15">奥雷里亚诺第二的财富与费尔南达</a></li>
+          <li><a href="#c16">奥雷里亚诺第二的晚境</a></li>
+          <li><a href="#c17">阿玛兰妲之死与带信</a></li>
+          <li><a href="#c18">乌尔苏拉之死与飞鸟之死</a></li>
+          <li><a href="#c19">费尔南达的末路与羊皮卷</a></li>
+          <li><a href="#c20">马孔多的终结</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">《百年孤独》是哥伦比亚作家加西亚·马尔克斯的魔幻现实主义代表作，以虚构小镇"马孔多"为舞台，用循环往复、亦真亦幻的笔法，讲述布恩迪亚家族七代人从迁徙建村、繁荣兴旺到衰败灭绝的百年传奇。</p>
+      <p>小说以何塞·阿尔卡蒂奥·布恩迪亚一家因一桩命案逃离故土、建立马孔多开篇，历经吉卜赛人的神奇发明、连绵的内战、外国香蕉公司的入侵与工人的大罢工、四年十一个月零两天的暴雨，直至家族最后一人破译出梅尔基亚德斯百年前写下的羊皮卷时，整个家族连同马孔多在飓风中被抹去，从世人记忆中根除。</p>
+      <p>它讲的是一群"注定孤独"的人——每个人都在自己的执念、爱恨、战争与情欲中打转，彼此相爱却永远无法真正沟通，最终在遗忘与重复中走向注定的毁灭。这本书写给所有对拉丁美洲历史、人类命运与"孤独"这一普遍处境感兴趣的读者；读完你会获得的不只是七代人的家族史，更是一种把神话、传说、现实与时间熔于一炉的文学世界观。</p>
+      <div class="tags">
+        <span class="tag">魔幻现实主义</span>
+        <span class="tag">家族史诗</span>
+        <span class="tag">循环时间</span>
+        <span class="tag">拉丁美洲</span>
+        <span class="tag">孤独</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+      <h2 style="margin-top:0"><span class="num">II</span>人物关系与命名谱系</h2>
+      <div class="cast-legend">
+        <span><span class="swatch" style="background:#2d5f8a"></span>男性 · 名字带"奥雷里亚诺"孤僻敏锐，带"何塞·阿尔卡蒂奥"冲动事业心</span>
+        <span><span class="swatch" style="background:#a04e7a"></span>女性 · 阿玛兰妲/蕾梅黛丝/梅梅等各有独立命运</span>
+        <span><span class="swatch" style="background:#b08d4f"></span>外部人物 · 梅尔基亚德斯（吉卜赛智者）贯穿全书</span>
+      </div>
+      <div class="cast-tree">
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第一代 · 建村者</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">何塞·阿尔卡蒂奥·布恩迪亚</div>
+              <div class="cast-role">族长 · 痴迷科学与奇迹，终被捆在栗树下</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">乌尔苏拉</div>
+              <div class="cast-role">族长之母 · 家族真正的脊梁，活至 115–122 岁</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第二代 · 出走与战争</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">何塞·阿尔卡蒂奥 <span class="aka">(次子)</span></div>
+              <div class="cast-role">冲动放纵 · 与丽贝卡乱伦，被枪杀，血线寻踪</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">奥雷里亚诺·布恩迪亚 <span class="aka">(上校)</span></div>
+              <div class="cast-role">发动 32 场起义全部失败 · 晚年做小金鱼</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">阿玛兰妲</div>
+              <div class="cast-role">胆怯与执念 · 织寿衣，拒绝所爱，平静死去</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">丽贝卡 <span class="aka">(儿媳)</span></div>
+              <div class="cast-role">食土怪癖 · 丈夫死后闭门幽居一生</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第三代 · 私生子与革命军</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">阿尔卡蒂奥</div>
+              <div class="cast-role">上校之侄 · 军政首领，暴政后被枪决</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">奥雷里亚诺·何塞</div>
+              <div class="cast-role">上校之侄 · 暗恋姑母阿玛兰妲，战场失踪</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第四代 · 香蕉公司时代</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">何塞·阿尔卡蒂奥第二</div>
+              <div class="cast-role">双胞胎之一 · 罢工领袖，唯一记得大屠杀真相</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">奥雷里亚诺第二</div>
+              <div class="cast-role">双胞胎之一 · 靠情妇佩特拉"爱的催化"暴富</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">蕾梅黛丝 <span class="aka">(美人儿)</span></div>
+              <div class="cast-role">天生丽质 · 抓着床单抓天而去</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">费尔南达</div>
+              <div class="cast-role">奥雷里亚诺第二之妻 · 内地贵族执念，枷锁</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">佩特拉·科特斯</div>
+              <div class="cast-role">情妇 · 与奥雷里亚诺第二患难与共</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第五代 · 衰落的家族</div>
+          <div class="cast-row">
+            <div class="cast-node female">
+              <div class="cast-name">梅梅 (雷纳塔)</div>
+              <div class="cast-role">费尔南达之女 · 与机械师相恋，被送进修道院</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">何塞·阿尔卡蒂奥</div>
+              <div class="cast-role">费尔南达之子 · 挥霍金币，被溺死在浴池</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第六 / 七代 · 破译者与终结者</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">奥雷里亚诺·巴比伦</div>
+              <div class="cast-role">梅梅的私生子 · 破译羊皮卷，见证马孔多终结</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">阿玛兰妲·乌尔苏拉</div>
+              <div class="cast-role">第五代 · 与奥雷里亚诺·巴比伦乱伦，产猪尾巴男婴</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">长猪尾巴的男婴</div>
+              <div class="cast-role">乱伦产物 · 刚出生即被蚂蚁吃掉</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen" style="margin-bottom:0">
+          <div class="cast-gen-label">外部贯穿人物</div>
+          <div class="cast-row">
+            <div class="cast-node other">
+              <div class="cast-name">梅尔基亚德斯</div>
+              <div class="cast-role">吉卜赛智者 · 带来磁铁/冰块/羊皮卷，写定家族百年命运</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">庇拉尔·特尔内拉</div>
+              <div class="cast-role">纸牌算命 · 家族无数男人的情人与母亲，活到 145 岁</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">马乌里肖·巴比伦</div>
+              <div class="cast-role">梅梅的恋人 · 黄蝴蝶为信号，被费尔南达设计致瘫</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="note"><strong>命名规律</strong>：所有叫"奥雷里亚诺"的都性格孤僻、头脑敏锐、富于洞察力；所有叫"何塞·阿尔卡蒂奥"的都性格冲动、富于事业心、但命中注定带有悲剧色彩。乌尔苏拉早在百年前就警告过：布恩迪亚家的人不可近亲结婚，否则会生下长猪尾巴的孩子——这一预言最终在第七代应验。</div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">III</span>作者简介</h2>
+      <p>加西亚·马尔克斯 1927 年 3 月 6 日生于哥伦比亚马格达莱纳省的阿拉卡塔卡镇，2014 年 4 月 17 日于墨西哥城去世。他幼年在外祖父（一位退役的上校、退休医生）与外祖母（一位充满民间智慧、笃信鬼神与预兆的老祖母）家长大，两位老人讲鬼故事、谈预言、回忆内战往事的方式——一本正经地把最离奇的事情当作最平常的事来叙述——深刻塑造了他日后"魔幻现实主义"的叙事腔调。<span style="color:var(--text-muted);font-size:13px">（据 Nobel Prize、大英百科等资料）</span></p>
+      <p>青年时代他曾在波哥大大学攻读法律，后辍学投身新闻，先后任职于《旁观者报》《先驱报》等哥伦比亚报刊，后因报道暴力事件被迫流亡欧洲、1961 年起定居墨西哥城。1958 年他与梅塞德斯·巴尔查结婚，育有二子。他的重要长篇小说包括《枯枝败叶》《恶时辰》《百年孤独》（1967，Sudamericana 出版社出版，一鸣惊人，成为国际畅销书，被译成数十种语言，售出数千万册，并获 1972 年罗慕洛·加列戈斯奖与纽斯塔特国际文学奖）、《家长的没落》《一桩事先张扬的凶杀案》《霍乱时期的爱情》《迷宫中的将军》等。</p>
+      <p>1982 年，瑞典文学院授予他诺贝尔文学奖，表彰其"将幻想与现实在一个想象丰沛、反映一个大陆的生命与冲突的世界中融为一体"的成就；授奖词特别强调《百年孤独》的巨大影响——正是这部作品奠定了他世界级文学大师的地位。写作本书的动机，源于他对故乡阿拉卡塔卡（"马孔多"的原型）的深情与对拉丁美洲百年孤独的体察：殖民、内战、外国资本与遗忘共同构成了一个大陆"没有第二次机会在大地上出现"的悲剧性循环。</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">IV</span>全书结构与故事梗概</h2>
+      <p>作为虚构作品，本书没有传统意义上的"论点"，而是一条贯穿七代人的生命—家族—小镇三重循环主线。</p>
+
+      <h3>故事梗概</h3>
+      <p>布恩迪亚家的族长何塞·阿尔卡蒂奥·布恩迪亚因斗鸡杀死普鲁邓希奥·阿基拉尔，在亡魂的纠缠下率众翻越山脉建立与世隔绝的马孔多。吉卜赛人梅尔基亚德斯带来磁铁、望远镜、放大镜、冰块、炼金术等"伟大发明"，点燃了这个家族对科学与奇迹的痴迷，也埋下孤独的基因。</p>
+      <p>此后家族在几个固定的名字（奥雷里亚诺／何塞·阿尔卡蒂奥）之间循环，性格也随之重复：叫奥雷里亚诺的孤僻敏锐、叫何塞·阿尔卡蒂奥的冲动放纵。第二代上校奥雷里亚诺发动三十二场武装起义全部失败，在权力与虚无中打滚近二十年，晚年靠做小金鱼了却残生；丽贝卡因吃土的怪癖与被放逐的命运把自己活成幽居的幽灵；阿玛兰妲因胆怯与恐惧折磨所爱之人（皮埃特罗·克雷斯皮自杀、赫里内勒多·马尔克斯一生等待），最终在织完寿衣的傍晚平静死去。</p>
+      <p>第四代的双胞胎奥雷里亚诺第二与何塞·阿尔卡蒂奥第二走向两个极端——一个靠情妇佩特拉·科特斯"爱的催化"获得牲畜疯狂繁殖的荒唐财富，另一个则躲进梅尔基亚德斯的房间破译羊皮卷、并亲历了香蕉工人大屠杀（三千多人被机枪扫射、两百节车厢的尸体被火车丢进大海）而成为唯一"记得真相"的疯子。美人儿蕾梅黛丝"抓着升天的床单"飞去；马孔多经历香蕉公司的繁荣、四年十一个月零两天的暴雨、彻底败落。</p>
+      <p>家族的最后一代（第六、七代）在乱伦中怀下长猪尾巴的孩子——正是乌尔苏拉百年前反复警告的预言。孩子刚出生即被蚂蚁吃掉，奥雷里亚诺·巴比伦破译出羊皮卷的最后一页，发现整个家族的命运早在一百年前就被梅尔基亚德斯写下；就在他读完的一瞬，马孔多随飓风从大地上被彻底抹去。</p>
+
+      <h3>核心冲突</h3>
+      <ul class="points">
+        <li><strong>个体/家族的炽热执念</strong>（爱、战争、权力、情欲、求知、记忆）与"孤独"这一无法逾越的宿命之间的对抗。</li>
+        <li><strong>历史真相</strong>（大屠杀、苦难）与<strong>官方遗忘</strong>之间的对抗——最终，真相与家族一同被风抹去。</li>
+      </ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">V</span>章节分析</h2>
+      <div class="note">以下按 EPUB 阅读顺序的 20 个正文单元逐节分析；原书为 20 章连续叙事，单元边界与原书章节大致对应但不完全重合。</div>
+
+      <div class="chapter" id="c1">
+        <h3><span class="ch-num">Chapter 01</span>建村、冰块与镜屋之梦</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>倒叙起笔——多年后面对行刑队，奥雷里亚诺·布恩迪亚上校回想起父亲带他去见识冰块的那个下午。族长何塞·阿尔卡蒂奥·布恩迪亚因斗鸡杀死普鲁邓希奥·阿基拉尔，被亡魂纠缠，率众翻山建立马孔多；他痴迷于吉卜赛人梅尔基亚德斯的磁铁、望远镜、放大镜、炼金术，最终悟出"地球是圆的，就像个橙子"，并看见"冰块"惊呼"这是我们这个时代最伟大的发明"。远征寻海失败后他绘出地图，认定马孔多三面环水、注定"活活烂掉"。</dd>
+          <dt>人物与关系</dt>
+          <dd>何塞·阿尔卡蒂奥·布恩迪亚（富于进取、终陷疯狂）与乌尔苏拉（勤劳持家、意志坚定）；梅尔基亚德斯（吉卜赛智者）作为外部世界与"启蒙"的化身。</dd>
+          <dt>主题作用</dt>
+          <dd>确立全书的叙事基调（过去、现在、未来在一句话里折叠）与"孤独/隔绝"的空间起点——马孔多是被水围住的孤岛，家族因孤独而向外求索（科学、奇迹）却又永远无法真正抵达外部世界。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c2">
+        <h3><span class="ch-num">Chapter 02</span>失眠症、外来者与第一任里正</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>吉卜赛人带来飞毯等娱乐，乌尔苏拉远行归来带回真正的"人间"移民，马孔多由村落变成城镇。丽贝卡作为孤儿被送来，带着装父母骨殖的口袋与"吃土"的怪癖。失眠症席卷小镇，全镇靠给万物贴标签来对抗"遗忘"，奥雷里亚诺发明标签法。梅尔基亚德斯死去又复活归来。里正堂阿波利纳尔·摩斯科特强行要求把房子漆成蓝色，被族长拎起衣领驱逐。</dd>
+          <dt>人物与关系</dt>
+          <dd>丽贝卡（食土、吮指、受惊的大眼——孤独与饥饿的符号）；奥雷里亚诺（沉默寡言、通晓金银工艺、预感如神）；阿玛兰妲与阿尔卡蒂奥的降生。</dd>
+          <dt>主题作用</dt>
+          <dd>"失忆"是全书的核心隐喻——一旦标签上的意义也被遗忘，现实将荡然无存。政府（里正）第一次登场即与家族产生权力摩擦，预示外部秩序终将侵入。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c3">
+        <h3><span class="ch-num">Chapter 03</span>炼金、爱情与第一次婚礼</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>丽贝卡与阿玛兰妲守孝三年后出落成少女；皮埃特罗·克雷斯皮带来自动钢琴并教舞，丽贝卡与他通信、陷入热恋，又因阿玛兰妲的诅咒（阻挠婚事）而濒临崩溃、再度食土。奥雷里亚诺与里正的小女儿蕾梅黛丝（仍在尿床的小女孩）相爱成婚。何塞·阿尔卡蒂奥归来后浑身刺青、体格巨硕，与丽贝卡乱伦般相爱并被逐出家门外。</dd>
+          <dt>人物与关系</dt>
+          <dd>阿玛兰妲对克雷斯皮的"求不得"埋下杀机；奥雷里亚诺与蕾梅黛丝（无邪的爱）；何塞·阿尔卡蒂奥与丽贝卡（火山般的情欲）；庇拉尔·特尔内拉（纸牌算命、家族无数男人的情人与母亲）。</dd>
+          <dt>主题作用</dt>
+          <dd>爱情的三种形态同时登场——无邪（奥雷里亚诺）、狂热（何塞·阿尔卡蒂奥与丽贝卡）、毁灭性（阿玛兰妲），奠定了全书"爱与孤独"的基本三角。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c4">
+        <h3><span class="ch-num">Chapter 04</span>神迹、死亡与疯狂</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>蕾梅黛丝成婚；尼卡诺尔神甫靠喝巧克力"腾空"证明神迹，被何塞·阿尔卡蒂奥·布恩迪亚用拉丁语一句"Hoc est simplicisimum"轻松驳倒，家族陷入彻底疯狂——他误把时间当成永远停在同一天，砸烂所有设备，被捆在院中的栗树下。梅尔基亚德斯再度"死"去。皮埃特罗·克雷斯皮因阿玛兰妲的拒绝割腕自杀。</dd>
+          <dt>人物与关系</dt>
+          <dd>蕾梅黛丝（用照料栗树下的公公来维系这个家的温暖）；阿玛兰妲以灼伤手掌"治疗悔恨"。</dd>
+          <dt>主题作用</dt>
+          <dd>理性与信仰的荒诞对撞（上校式的清醒 vs 神甫的戏法）；阿玛兰妲的自杀事件是她一生"无穷的爱意与无法战胜的胆怯之间殊死较量"的顶点，也是她终身孤独的源头。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c5">
+        <h3><span class="ch-num">Chapter 05</span>战争爆发与上校诞生</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>因选举舞弊与士兵强收武器，自由派被激怒。奥雷里亚诺在岳父家当众宣布"我当自由派，因为保守派净是些骗子"。假医生阿利黎奥·诺格拉暗中策划刺杀保守党全家，被奥雷里亚诺识破。十二月初战争真正爆发：二十一名青年奇袭军营、缴枪并枪毙上尉，阿尔卡蒂奥被任命为镇军政首领，奥雷里亚诺成为"奥雷里亚诺·布恩迪亚上校"。</dd>
+          <dt>人物与关系</dt>
+          <dd>奥雷里亚诺从匠人蜕变为战士；岳父摩斯科特（自由派岳父，被女婿的立场反讽）；赫里内勒多·马尔克斯（挚友）。</dd>
+          <dt>主题作用</dt>
+          <dd>理想主义（为自由、为菜刀）被现实政治迅速腐蚀，战争的荒诞性（以一场偶然的换票舞弊点燃）为"三十二场起义全部失败"定下基调。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c6">
+        <h3><span class="ch-num">Chapter 06</span>阿尔卡蒂奥的暴政与上校之死</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>阿尔卡蒂奥实行恐怖统治，乌尔苏拉挥鞭把他从军营救回；他滥用公款、盖房纳妾（桑塔索菲亚·德拉·彼达），最终被政府军判处枪决，临刑前终于摆脱一生的恐惧、眷恋起最深的亲人。上校被判处死刑押回马孔多，丽贝卡彻夜守候；行刑队指挥官（罗格·卡尔尼塞罗）朝天开枪，何塞·阿尔卡蒂奥端枪出现，上校由此逃脱、正式投入战争。</dd>
+          <dt>人物与关系</dt>
+          <dd>阿尔卡蒂奥（被身世秘密压垮、渴望权力却又天性怯懦）；乌尔苏拉（家族真正的守护者）；丽贝卡（等待与守候的原型）。</dd>
+          <dt>主题作用</dt>
+          <dd>战争的暴力机器以最无辜的"私生子/弃儿"阿尔卡蒂奥为祭品；"死亡"与"孤独"作为反复出现的救赎与惩罚机制被强化。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c7">
+        <h3><span class="ch-num">Chapter 07</span>三十二场战争与虚无</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>上校发动三十二场武装起义无一成功，官至革命军总司令却从不许人拍照，躲过十四次暗杀、七十三次伏击和一次枪决，十七个儿子一夜之间被逐个除掉。他因马钱子碱中毒险死；发现"我打仗是为了自尊"。尼兰迪亚协定签订后，他在自己画圈的三米隔离中活着，把战功、诗稿、勋章一概弃之如遗物，最后签完停战协定即在胸前开枪（子弹穿过而不伤要害）——以自杀未遂嘲弄命运。</dd>
+          <dt>人物与关系</dt>
+          <dd>上校与赫里内勒多（为"伟大的自由党"而战的对照）；乌尔苏拉与死去的丈夫。</dd>
+          <dt>主题作用</dt>
+          <dd>全书最浓墨重彩的"孤独"核心——上校为抽象口号而战，越胜利越空洞，最终连失败都索然无味。"做小金鱼—熔化—重做"的循环成为他晚年对抗虚无的仪式。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c8">
+        <h3><span class="ch-num">Chapter 08</span>丽贝卡的幽居与何塞·阿尔卡蒂奥之死</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>上校凯旋归来却已形同陌路。何塞·阿尔卡蒂奥与丽贝卡搬入阿尔卡蒂奥盖的房子；某天一声枪响，一道血线从卧室门下涌出，穿过客厅、街道、土耳其人大街，绕过整个布恩迪亚家，最后从厨房潜入正在做面包的乌尔苏拉脚下。何塞·阿尔卡蒂奥仰面死亡，无伤口、无凶器，火药味经反复擦洗仍无法去除——马孔多唯一未解的谜。丽贝卡从此闭门、过活人的生活。</dd>
+          <dt>人物与关系</dt>
+          <dd>丽贝卡与死去的丈夫（用一生的幽居守一份来路不明的激情）；乌尔苏拉（循着血线找到真相）。</dd>
+          <dt>主题作用</dt>
+          <dd>血线寻踪是全书最著名的意象之一——"血缘/孤独"的红色轨迹把分散的空间缝合成一个家族共同体；无解的谋杀强化"命运不可知"的悬疑感。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c9">
+        <h3><span class="ch-num">Chapter 09</span>阿玛兰妲的寿衣与皮埃特罗·克雷斯皮的安魂</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>赫里内勒多·马尔克斯上校四年求爱被拒；香蕉热潮兴起，美国香蕉公司到来。何塞·阿尔卡蒂奥第二（孪生子之一）狂热地砸石疏河想做航运、办马戏般失败。美人儿蕾梅黛丝（第四代）天生丽质、不谙世事。皮埃特罗·克雷斯皮自杀后乌尔苏拉顶住神甫反对，把他葬在梅尔基亚德斯墓旁——"这个男人是一位圣徒"。</dd>
+          <dt>人物与关系</dt>
+          <dd>阿玛兰妲（织寿衣、与克雷斯皮的黑纱、终身的悔恨）；赫里内勒多（忠贞而徒劳的等待者）。</dd>
+          <dt>主题作用</dt>
+          <dd>香蕉公司的入侵把马孔多从"乐土"推向被资本与外来秩序殖民的命运；阿玛兰妲的悔恨成为她晚年孤独的注脚。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c10">
+        <h3><span class="ch-num">Chapter 10</span>美人儿蕾梅黛丝与香蕉公司时代</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>香蕉公司带来电灯、电影、电话、手摇唱机、美国人与法国妓女，马孔多由小镇变成国际化营地。美人儿蕾梅黛丝因天生香气与绝世美貌，成为无数男人（甚至偷窥者）死亡的"不祥"之源，她却一无所知。她抓着升天的床单随风而去，肉身直升天界。</dd>
+          <dt>人物与关系</dt>
+          <dd>蕾梅黛丝（不属于凡间的纯真/毁灭性）；奥雷里亚诺·布恩迪亚上校（坚信她是"最有智慧的人"）；乌尔苏拉（视之为家中最无瑕的灵魂）。</dd>
+          <dt>主题作用</dt>
+          <dd>魔幻现实的巅峰笔法——升天被当作"挽回家誉的奇迹"而非超自然事件；"美人即死亡召唤"呼应全书"美丽与危险一体两面"的逻辑。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c11">
+        <h3><span class="ch-num">Chapter 11</span>香蕉公司与工人大罢工</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>香蕉公司由布朗先生掌控，用代用券、假药丸、移动厕所等伎俩盘剥工人，律师团在法庭上证明"根本不存在什么工人"。何塞·阿尔卡蒂奥第二成为罢工领袖，发动大罢工。中尉宣读省军政主席四号令：罢工者为"一伙不法分子"，授权军队枪决。上尉喊"再有一分钟就开枪"，何塞·阿尔卡蒂奥第二回敬"浑蛋！这一分钟你们自己留着吧"。三千多工人被十四处机枪掩体扫射。</dd>
+          <dt>人物与关系</dt>
+          <dd>何塞·阿尔卡蒂奥第二（唯一幸存、唯一记得真相的"疯子"）；加比兰上校（同难者，尸体被认出）；被举在头顶的孩子（目击者）。</dd>
+          <dt>主题作用</dt>
+          <dd>全书历史批判的最强音——一场被官方彻底"遗忘"的大屠杀。"记忆"与"被抹去的记忆"成为对抗的核心；幸存者从此活在一个比栗树下更幽深的黑暗世界里。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c12">
+        <h3><span class="ch-num">Chapter 12</span>四年十一个月零两天的雨</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>大屠杀后官方宣称"没有死人"，何塞·阿尔卡蒂奥第二在尸骸成山的近两百节车厢火车上幸存，回村后无人相信他见过任何事。马孔多开始下起暴雨，一泻四年十一个月零两天。奥雷里亚诺第二在雨中被困家中、修锁修表，情妇佩特拉·科特斯眼睁睁看着牲畜成批死去。赫里内勒多·马尔克斯上校在泥泞中下葬。</dd>
+          <dt>人物与关系</dt>
+          <dd>何塞·阿尔卡蒂奥第二（躲进梅尔基亚德斯房间破译羊皮卷，拒绝出门）；奥雷里亚诺第二（衰老、清心寡欲）；乌尔苏拉（预言"我等雨停了就死"）。</dd>
+          <dt>主题作用</dt>
+          <dd>雨是"时间/历史/遗忘"的液态隐喻——冲毁繁荣、泡烂记忆、让真相无处安放。官方叙事与亲历者的记忆之间的裂缝在此被彻底撕开。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c13">
+        <h3><span class="ch-num">Chapter 13</span>乌尔苏拉的失明与家族洞察</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>雨停后热风席卷。乌尔苏拉早已失明却靠气味、记忆、习惯维系全家，无人察觉；她第一次获得"穿透孤独的洞察力"，看清上校"从未爱过任何人，是一个无力去爱的人"，看清阿玛兰妲才是"世上从未有过的最温柔的女人"，并迟来理解丽贝卡的勇气。她为家族积攒的金币被埋在秘密地点。</dd>
+          <dt>人物与关系</dt>
+          <dd>乌尔苏拉（家族真正的脊梁与道德镜子）；她盲眼中的子孙。</dd>
+          <dt>主题作用</dt>
+          <dd>乌尔苏拉的失明是全知视角的隐喻——只有不看，才真正"看见"；她晚年的洞察几乎是对全书宿命（重复、近亲、猪尾巴、孤独）的最终预言与和解。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c14">
+        <h3><span class="ch-num">Chapter 14</span>梅梅、马乌里肖与黄蝴蝶</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>费尔南达的独生女梅梅（雷纳塔）叛逆而现代，与香蕉公司的机械师马乌里肖·巴比伦相恋；黄蝴蝶是马乌里索出现的信号。费尔南达请守夜人守鸡，一枪打中马乌里肖的脊柱。梅梅从此一言不发，被费尔南达骗进修道院，终生在异国（克拉科夫）衰老而死。她的私生子奥雷里亚诺被装在篮子里随水漂来（"弃婴"谎言）。</dd>
+          <dt>人物与关系</dt>
+          <dd>梅梅（重演阿玛兰妲式的爱与孤独）；马乌里肖·巴比伦（被当作偷鸡贼、至死不辩解的黄蝴蝶幽灵）；庇拉尔·特尔内拉（梅梅的曾祖母，纸牌看透一切）。</dd>
+          <dt>主题作用</dt>
+          <dd>爱情再次被"家族名声/孤独"绞杀；"黄蝴蝶"与"食土""小金鱼""灰烬十字"一样，成为某种无法消除的命运印记。上一代女性的悲剧在梅梅身上精确重演。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c15">
+        <h3><span class="ch-num">Chapter 15</span>奥雷里亚诺第二的财富与费尔南达的枷锁</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>奥雷里亚诺第二靠与情妇佩特拉·科特斯的"爱情催化"使牲畜疯狂繁殖，一夜暴富，把钞票糊满全屋；费尔南达（"马达加斯加女王"式的内地贵族女性）带金溺盆、列夫人家谱、与隐身的医生通信，把家变成修道院。奥雷里亚诺第二与第一任妻子费尔南达、情妇佩特拉维持三人相安无事的荒唐关系。</dd>
+          <dt>人物与关系</dt>
+          <dd>奥雷里亚诺第二（享乐的活力、家族兴衰的推手）；费尔南达（规矩与枷锁）；佩特拉·科特斯（真正"赋予他生命"的女人）。</dd>
+          <dt>主题作用</dt>
+          <dd>财富像牲畜一样荒唐地来、注定荒唐地走；费尔南达的"女王/贵族"执念是外部秩序内化到家庭内部的荒诞样本。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c16">
+        <h3><span class="ch-num">Chapter 16</span>奥雷里亚诺第二的晚境与庇拉尔·特尔内拉</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>香蕉热潮退去，奥雷里亚诺第二的财富被"母象"卡米拉·萨迦丝杜梅的进食大赛几乎吃空，又在佩特拉·科特斯靠彩票重振家业中相依为命。庇拉尔·特尔内拉活到一百四十五岁以上，仍是家族所有男人的纸牌解语者。乌尔苏拉去世前反复叮嘱"不要让布恩迪亚家的人近亲结婚，生下长猪尾巴的孩子"。</dd>
+          <dt>人物与关系</dt>
+          <dd>奥雷里亚诺第二与佩特拉·科特斯（晚年患难与共、"共享孤独的天堂"）；庇拉尔·特尔内拉（家族史的活档案）。</dd>
+          <dt>主题作用</dt>
+          <dd>财富的狂欢散场后，唯有"孤独"长存；庇拉尔·特尔内拉的百岁长寿与纸牌智慧，象征被家族反复"召唤"又反复"遗忘"的母系根脉。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c17">
+        <h3><span class="ch-num">Chapter 17</span>阿玛兰妲之死与带信</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>阿玛兰妲预知死期，亲手织完寿衣，向全镇宣布将给亡者带信。她拒绝宗教忏悔，平静地在完工的傍晚死去，死时"没有痛苦、没有恐惧也没有烦恼"。此后梅梅被送走、香蕉公司的撤离已成定局。</dd>
+          <dt>人物与关系</dt>
+          <dd>阿玛兰妲（以死亡完成对孤独的彻底持守）；乌尔苏拉之死紧随其后。</dd>
+          <dt>主题作用</dt>
+          <dd>阿玛兰妲的死亡是"孤独"的最终完成——她早已把织寿衣当作"持守孤独"而非"击败孤独"的方式；向亡者带信象征生者与死者在"遗忘"面前的最后一次握手。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c18">
+        <h3><span class="ch-num">Chapter 18</span>乌尔苏拉之死与飞鸟之死</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>飞鸟莫名大批撞死在卧室，神甫归咎于"流浪的犹太人"（半人半兽的怪物），人们设陷阱将其猎杀焚烧。乌尔苏拉在圣星期四凌晨去世，享年约一百一十五至一百二十二岁。丽贝卡也在同年年底死去，死时缩如虾米、含着拇指，一生被世人遗忘。</dd>
+          <dt>人物与关系</dt>
+          <dd>乌尔苏拉（家族绵延的真正根基）；丽贝卡（"从未喝过自己的奶水"、流淌陌生人血液的异类，最得乌尔苏拉晚年的理解与敬意）。</dd>
+          <dt>主题作用</dt>
+          <dd>乌尔苏拉的死标志着家族内在凝聚力的瓦解；飞鸟之死与"流浪的犹太人"的传说，为马孔多的衰败蒙上末世与天谴的色彩。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c19">
+        <h3><span class="ch-num">Chapter 19</span>费尔南达的末路与羊皮卷</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>费尔南达死后，被逐出家门的何塞·阿尔卡蒂奥（自诩罗马神学生、实则从未完成神学）靠孩子发现乌尔苏拉埋藏的七千二百一十四枚金币，挥霍无度后被四个孩子溺死在浴池中。奥雷里亚诺（弃婴）在梅尔基亚德斯的房间里与何塞·阿尔卡蒂奥第二一同研读羊皮卷，学会梵文、英语、法语。何塞·阿尔卡蒂奥第二临终遗言："你要永远记住，那是三千多人，都被扔进了海里。"</dd>
+          <dt>人物与关系</dt>
+          <dd>何塞·阿尔卡蒂奥第二（家中最清醒、唯一的真相见证者）；奥雷里亚诺（羊皮卷的破译者）。</dd>
+          <dt>主题作用</dt>
+          <dd>真相（大屠杀的死亡人数）以临终遗言的方式传给下一代表皮卷破译者——记忆与遗忘、历史与预言在此交汇。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c20">
+        <h3><span class="ch-num">Chapter 20</span>马孔多的终结</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>阿玛兰妲·乌尔苏拉与奥雷里亚诺·巴比伦（奥雷里亚诺第二之孙、其实是姨妈与外甥）陷入疯狂的爱情，生下长猪尾巴的男婴，即乌尔苏拉百年前警告的"终结家族的生物"。阿玛兰妲·乌尔苏拉因产后大出血而死，孩子被全世界的蚂蚁拖走吃掉。奥雷里亚诺终于破译羊皮卷的最后一页，读到"家族的第一个人被捆在树上，最后一个人正被蚂蚁吃掉"；就在他译出"正在破译羊皮卷的这一刻"的瞬间，马孔多在飓风中化作瓦砾与尘埃，被从世人记忆中根除。</dd>
+          <dt>人物与关系</dt>
+          <dd>奥雷里亚诺·巴比伦（羊皮卷的最终破译者）；阿玛兰妲·乌尔苏拉（最后一个"用爱孕育生命"的布恩迪亚，也是乱伦宿命的最后一环）；梅尔基亚德斯（百年前的书写者）。</dd>
+          <dt>主题作用</dt>
+          <dd>预言自我实现——羊皮卷写于"一个世纪的日常琐碎集中在同一瞬间发生"，因此当奥雷里亚诺读到自己的死亡时，他也正在走向它。全书以"镜子之城/蜃景之城"被飓风抹去、"不会有第二次机会在大地上出现"作结，把"孤独"推向宇宙级的、不可重复的终结。</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">VI</span>金句摘录</h2>
+      <ol class="quotes">
+        <li>
+          多年以后，面对行刑队，奥雷里亚诺·布恩迪亚上校将会回想起父亲带他去见识冰块的那个遥远的下午。那时的马孔多是一个二十户人家的村落……
+          <span class="src">Chapter 01 · 全书最著名的句子，一句折叠了过去、现在与未来</span>
+        </li>
+        <li>
+          实际上他从未爱过任何人……不过是个无力去爱的人。
+          <span class="src">Chapter 13 · 乌尔苏拉晚年的洞察，理解全书"孤独"的钥匙</span>
+        </li>
+        <li>
+          她深深遗憾没能在多年前获得这样的领悟，那时还来得及净化记忆，在崭新的光芒下重建世界……将丽贝卡救出悲惨的境地，而这不是出于爱也不是出于恨，而是出于对孤独的深切理解。
+          <span class="src">Chapter 17 · 阿玛兰妲之死的顿悟</span>
+        </li>
+        <li>
+          你那么憎恨军人，跟他们斗了那么久，琢磨了他们那么久，最终却变得和他们一样。人世间没有任何理想值得以这样的沉沦作为代价。
+          <span class="src">Chapter 11 · 蒙卡达将军论战争与权力</span>
+        </li>
+        <li>
+          你要永远记住，那是三千多人，都被扔进了海里。
+          <span class="src">Chapter 19 · 何塞·阿尔卡蒂奥第二的唯一证言</span>
+        </li>
+        <li>
+          这座镜子之城——或蜃景之城——将在奥雷里亚诺·巴比伦全部译出羊皮卷之时被飓风抹去，从世人记忆中根除，羊皮卷上所载一切自永远至永远不会再重复，因为注定经受百年孤独的家族不会有第二次机会在大地上出现。
+          <span class="src">Chapter 20 · 关于终结的最终预言</span>
+        </li>
+        <li>
+          所有叫奥雷里亚诺的都性格孤僻，但头脑敏锐，富于洞察力；所有叫何塞·阿尔卡蒂奥的都性格冲动，富于事业心，但命中注定带有悲剧色彩。
+          <span class="src">Chapter 13 · 乌尔苏拉总结命名传统</span>
+        </li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VII</span>批判性思考与延伸</h2>
+
+      <h3>优点与局限</h3>
+      <ul class="points">
+        <li><strong>文学成就</strong>：《百年孤独》把魔幻现实主义推向了难以逾越的高度——以马尔克斯外祖母"一本正经讲最离奇之事"的叙事腔调，让升天、长猪尾巴、四年暴雨与真实历史（如香蕉工人大罢工）在同一平面上共存，创造出一种既神话又无比真实的文学世界。它对"循环时间""被官方抹去的历史记忆""孤独的普遍性"的洞察，使其超越地域与时代；七代人的重复命名与性格轮回，使家族史获得近乎神话史诗的结构感。</li>
+        <li><strong>叙事门槛</strong>：叙事密度极高、人名频繁重复（奥雷里亚诺／何塞·阿尔卡蒂奥反复出现），对不熟悉家族树的读者构成相当门槛，需反复回溯才能厘清谱系。</li>
+        <li><strong>历史隐喻</strong>：后半段（尤其香蕉公司之后）情节密集、事件跳跃，历史隐喻（大罢工被遗忘）虽有力，但现实指涉较为隐晦，需结合哥伦比亚历史背景才能充分领会。</li>
+        <li><strong>性别视角</strong>：其"宿命无法逃脱"的悲观底色与女性角色多被框定在情欲/母职/牺牲之中（尽管乌尔苏拉、阿玛兰妲、丽贝卡等形象极为复杂），在当代性别视角下值得重新讨论。</li>
+      </ul>
+
+      <h3>适合 / 不适合的读者</h3>
+      <ul class="points">
+        <li><strong>适合</strong>：对文学结构、家族史、神话叙事、拉丁美洲历史、时间哲学感兴趣的读者；喜欢《百年孤独》式"循环+预言"结构的读者；有一定耐心梳理人名与谱系的读者。</li>
+        <li><strong>不太适合</strong>：偏好线性、快节奏情节、明确主题表达的读者；初次接触世界文学、对长篇人名敏感者可能在中途感到吃力（可先借助人物关系表）。</li>
+      </ul>
+
+      <h3>互为补充 / 对照的书</h3>
+      <ul class="points">
+        <li><strong>《霍乱时期的爱情》</strong>（马尔克斯）：同样写孤独与爱情，但更集中于爱情本身的形态，可与《百年孤独》对照阅读。</li>
+        <li><strong>《家长的没落》《迷宫中的将军》</strong>（马尔克斯）：延续其历史与权力的书写。</li>
+        <li><strong>《2666》</strong>（罗贝托·波拉尼奥）：同为拉美文学高峰。</li>
+        <li><strong>《喧哗与骚动》</strong>（福克纳）：同为南方/拉美"家族衰败+循环时间"的复调史诗，可并读体会时空观的差异。</li>
+        <li><strong>《拉丁美洲被切开的血管》</strong>（爱德华多·加莱亚诺，非虚构）：提供了香蕉公司、外国资本入侵与工人苦难的历史背景，可补足小说中被"遗忘"的历史真相。</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">百年孤独</div>
+  Cien años de soledad · 读书笔记 · 生成于 2026
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
