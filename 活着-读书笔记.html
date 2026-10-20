@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活着 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #7a4a2b;
+    --accent-soft: #f0e2d3;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(230,180,120,.22), transparent 60%), linear-gradient(180deg, #2a1a12 0%, #5a3a25 100%);
+    --hero-text: #f3e6d2;
+    --hero-subtitle: rgba(243,230,210,.72);
+    --hero-meta: rgba(243,230,210,.78);
+    --hero-accent: #e2b87a;
+    --hero-divider: rgba(243,230,210,.18);
+    --progress-gradient: linear-gradient(90deg, #7a4a2b, #e2b87a);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(255,180,110,.08), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,150,90,.06), transparent 40%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans); font-size: 12px; letter-spacing: .4em;
+    color: var(--hero-accent); text-transform: uppercase;
+    margin-bottom: 20px; position: relative;
+  }
+  .hero h1 {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em; margin: 0 0 20px;
+    line-height: 1.2; color: var(--hero-text); position: relative;
+  }
+  .hero .subtitle {
+    font-family: var(--serif); font-style: italic;
+    font-size: 17px; color: var(--hero-subtitle);
+    letter-spacing: .1em; margin-bottom: 36px; position: relative;
+  }
+  .hero .meta {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px 22px; font-family: var(--sans); font-size: 13px;
+    color: var(--hero-meta); padding-top: 20px;
+    border-top: 1px solid var(--hero-divider); position: relative;
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1440px; margin: 0 auto;
+    padding: 48px 32px 96px;
+    display: grid; grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px; align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky; top: 24px; align-self: start;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+    padding-right: 16px; border-right: 1px solid var(--border);
+    font-family: var(--sans); font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px; letter-spacing: .3em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block; padding: 6px 0 6px 22px;
+    color: var(--text-soft); text-decoration: none;
+    position: relative; line-height: 1.5; transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc;
+    position: absolute; left: 0;
+    color: var(--text-muted);
+    font-size: 11px; font-weight: 500; letter-spacing: .05em;
+    top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif); font-size: 26px; font-weight: 700;
+    color: var(--text); margin: 0 0 28px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em; position: relative;
+  }
+  h2::after {
+    content: ""; position: absolute; left: 0; bottom: -2px;
+    width: 60px; height: 2px; background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block; font-family: var(--sans);
+    font-size: 13px; color: var(--accent);
+    letter-spacing: .2em; margin-right: 14px;
+    font-weight: 500; vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif); font-size: 19px; font-weight: 600;
+    color: var(--text); margin: 36px 0 14px; padding-left: 14px;
+    border-left: 3px solid var(--gold); line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans); font-size: 11px;
+    color: var(--accent); letter-spacing: .2em;
+    display: block; margin-bottom: 4px; font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead { font-size: 18.5px; color: var(--text); line-height: 1.9; }
+
+  .note {
+    font-family: var(--sans); font-size: 13px;
+    color: var(--text-muted); padding: 14px 18px;
+    background: #f5f1e5; border-radius: 4px;
+    margin: 16px 0; line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  /* 人物关系图 */
+  .cast-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 32px 24px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+    scroll-margin-top: 24px;
+  }
+  .cast-legend {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    font-family: var(--sans); font-size: 12.5px;
+    color: var(--text-soft);
+    padding: 14px 18px;
+    background: #f7f3ea; border-radius: 6px;
+    margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block; width: 12px; height: 12px;
+    border-radius: 3px; vertical-align: middle; margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px; letter-spacing: .3em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .cast-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .cast-node {
+    flex: 0 0 auto; min-width: 180px;
+    padding: 12px 16px;
+    background: #faf6ec;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name {
+    font-family: var(--serif); font-weight: 600;
+    font-size: 15px; color: var(--text); line-height: 1.3;
+  }
+  .cast-name .aka {
+    font-weight: 400; font-size: 12px;
+    color: var(--text-muted); margin-left: 4px;
+  }
+  .cast-role {
+    font-family: var(--sans); font-size: 12.5px;
+    color: var(--text-soft); margin-top: 5px; line-height: 1.55;
+  }
+  .cast-note {
+    font-family: var(--sans); font-size: 12px;
+    color: var(--text-muted); margin-top: 4px; font-style: italic;
+  }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px;
+    position: relative; line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6"; position: absolute; left: 4px; top: 10px;
+    color: var(--gold); font-size: 10px;
+  }
+
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06);
+  }
+  .chapter h3 {
+    margin: 0 0 16px; padding: 0 0 12px;
+    border-left: none; border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans); font-size: 11.5px;
+    letter-spacing: .2em; color: var(--accent);
+    text-transform: uppercase; margin-top: 14px; margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote;
+    padding: 22px 24px 22px 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px; margin-bottom: 14px;
+    position: relative;
+    font-family: var(--serif);
+    font-size: 16.5px; line-height: 1.9;
+    color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute; left: 20px; top: 22px;
+    font-family: var(--serif); font-style: italic;
+    font-size: 28px; color: var(--accent); font-weight: 600;
+  }
+  .quotes .src {
+    display: block; font-family: var(--sans);
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 8px; letter-spacing: .05em;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px; }
+  .tag {
+    display: inline-block; padding: 4px 12px;
+    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--sans); font-size: 12px;
+    border-radius: 999px; letter-spacing: .05em;
+  }
+
+  hr {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  footer {
+    text-align: center; padding: 40px 24px 60px;
+    color: var(--text-muted);
+    font-family: var(--sans); font-size: 12.5px;
+    letter-spacing: .1em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif); font-size: 22px;
+    color: var(--accent); letter-spacing: .3em;
+    margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent); color: #fff;
+    border: none; cursor: pointer; font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif); font-size: 3.4em;
+    float: left; line-height: .9;
+    padding: 6px 10px 0 0;
+    color: var(--accent); font-weight: 700;
+  }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>活着</h1>
+  <div class="subtitle">To Live — 一个人为他身边的人，一个一个地送葬</div>
+  <div class="meta">
+    <span><strong>类型</strong>虚构 · 现实主义 / 苦难叙事</span>
+    <span><strong>作者</strong>余华</span>
+    <span><strong>字数</strong>约 7.7 万字（正文）</span>
+    <span><strong>叙事结构</strong>第一人称框架 + 顺叙半生</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物关系与命名谱系</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与故事梗概</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">采风者的午后 · 福贵登场</a></li>
+          <li><a href="#c2">前言 · 从《老黑奴》出发</a></li>
+          <li><a href="#c3">第一章 · 徐家少爷的荒唐岁月</a></li>
+          <li><a href="#c4">第二章 · 龙二设局 · 父亲之死</a></li>
+          <li><a href="#c5">第三章 · 租田拉壮丁 · 战场余生</a></li>
+          <li><a href="#c6">第四章 · 母亲之死 · 龙二替死</a></li>
+          <li><a href="#c7">第五章 · 人民公社 · 家珍病倒</a></li>
+          <li><a href="#c8">第六章 · 有庆之死 · 春生重逢</a></li>
+          <li><a href="#c9">第七章 · 家珍之死 · 凤霞出嫁</a></li>
+          <li><a href="#c10">第八章 · 凤霞难产 · 万二喜之爱</a></li>
+          <li><a href="#c11">第九章 · 家珍弥留 · 苦根出生</a></li>
+          <li><a href="#c12">第十章 · 二喜之死 · 苦根之殇</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">《活着》是余华沉淀十年之后的转型之作。小说借一位下乡采风、收集民谣的年轻人之眼，让一位名叫福贵的老人坐在田埂上，向"我"全盘讲述他的一生——一个地主家的败家少爷如何输光家产、被抓壮丁、母亲与儿女相继死去，最终只剩他与一头老牛，在阳光里平静地犁田、回忆。</p>
+      <p>故事从福贵"还年轻时"的浪荡开局：他是徐家独子，骑在雇工背上念私塾，骑在妓女身上经过米行向岳父请安，最后迷上龙二设好的赌局，把祖辈留下的一百多亩地和房产一夜输光。父亲从粪缸上摔下而死，母亲在他被拉壮丁后病故，儿子有庆为县长夫人献血被抽干而死，女儿凤霞难产而死，妻子家珍软骨病而死，女婿万二喜被水泥板夹死，外孙苦根因吃豆子撑死。每送走一个，福贵都亲手埋掉——他是这个家里最后一个活着的人。</p>
+      <p>余华在自序里说，他听到一首美国民歌《老黑奴》后决定写这样一篇小说："写人对苦难的承受能力，对世界乐观的态度。写作过程让我明白，人是为活着本身而活着的，而不是为活着之外的任何事物所活着。"这本书写给所有以为生活一定会越来越好、却在半路上被命运反复击打的人；读完你得到的不是绝望，而是一种近乎残酷的平静——原来"活着"本身就是意义，不需要理由，不需要回报。</p>
+      <div class="tags">
+        <span class="tag">现实主义</span>
+        <span class="tag">苦难叙事</span>
+        <span class="tag">中国当代</span>
+        <span class="tag">第一人称框架</span>
+        <span class="tag">民间歌谣</span>
+        <span class="tag">命运与承受</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+      <h2 style="margin-top:0"><span class="num">II</span>人物关系与命名谱系</h2>
+      <div class="cast-legend">
+        <span><span class="swatch" style="background:#2d5f8a"></span>徐家 · 父系主线</span>
+        <span><span class="swatch" style="background:#a04e7a"></span>女性 · 家珍/凤霞构成情感核心</span>
+        <span><span class="swatch" style="background:#b08d4f"></span>外部人物 · 龙二、春生、万二喜、王喜等</span>
+      </div>
+      <div class="cast-tree">
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第一代 · 徐家败家之前</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">徐福贵 <span class="aka">(主角)</span></div>
+              <div class="cast-role">徐家独子 · 从浪荡少爷到孤苦老人</div>
+              <div class="cast-note">赌光家产、被抓壮丁，最后亲手送走所有亲人</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">福贵的父亲</div>
+              <div class="cast-role">徐家当家人 · 从粪缸上摔下而死</div>
+              <div class="cast-note">"徐家出了两个败家子"</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">福贵的母亲</div>
+              <div class="cast-role">温柔坚韧 · 盼儿归，病逝前不知他被抓壮丁</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">长根</div>
+              <div class="cast-role">徐家老雇工 · 破产后讨饭，后偷偷回来看一眼</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第二代 · 家珍与有庆</div>
+          <div class="cast-row">
+            <div class="cast-node female">
+              <div class="cast-name">家珍 <span class="aka">(陈氏)</span></div>
+              <div class="cast-role">米行陈老板之女 · 被福贵打骂仍不离不弃</div>
+              <div class="cast-note">软骨病，临终"死得很好，平平安安"</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">有庆 <span class="aka">(徐有庆)</span></div>
+              <div class="cast-role">儿子 · 长跑名将，为县长夫人献血而死（13岁）</div>
+              <div class="cast-note">与羊相依为命，被抽干血死在砖屋里</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">凤霞 <span class="aka">(徐凤霞)</span></div>
+              <div class="cast-role">女儿 · 高烧聋哑，后被送人、又逃回</div>
+              <div class="cast-note">出嫁万二喜，因难产死于同一家医院</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">第三代 · 二喜与苦根</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">万二喜 <span class="aka">(偏头)</span></div>
+              <div class="cast-role">凤霞之夫 · 城里搬运工，实心眼爱凤霞</div>
+              <div class="cast-note">水泥板夹死，临死喊"苦根"</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">苦根 <span class="aka">(徐苦根)</span></div>
+              <div class="cast-role">外孙 · 生来无娘，四岁吃豆子撑死</div>
+              <div class="cast-note">名字由家珍所起："生下来没有了娘"</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen" style="margin-bottom:0">
+          <div class="cast-gen-label">外部贯穿人物</div>
+          <div class="cast-row">
+            <div class="cast-node other">
+              <div class="cast-name">龙二</div>
+              <div class="cast-role">赌局赢家 · 解放后成了地主，被枪毙五枪</div>
+              <div class="cast-note">"福贵，我是替你去死啊。"</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">春生 <span class="aka">(刘解放 / 刘县长)</span></div>
+              <div class="cast-role">福贵的战友 · 战场上欠福贵一条命</div>
+              <div class="cast-note">文革中被批斗，上吊而死</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">老全</div>
+              <div class="cast-role">福贵战场上的老兵 · 被子弹打死在尸体堆里</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">王喜 / 队长</div>
+              <div class="cast-role">原佃户、后任村队长 · 烧了自家屋子煮钢铁</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">"我"</div>
+              <div class="cast-role">下乡采风者 · 福贵的倾听者，叙事框架</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="note"><strong>死亡顺序</strong>：父亲 → 母亲 → 有庆 → 家珍 → 凤霞 → 二喜 → 苦根 → 福贵自己（预期中）。徐家从"一百多亩地"到一个老人、一头老牛、几亩包产地，是全书最直观的家庭衰亡曲线。所有重要女性（家珍、凤霞、苦根之母）都死在生产/生育/疾病的循环中，构成余华对20世纪中国农村女性命运的一记冷峻侧写。</div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">III</span>作者简介</h2>
+      <p>余华，1960年4月3日生于浙江杭州，父母均为医生，因家境把他送回海盐由祖父抚养，后迁居海盐县。中学毕业后因家庭成分与个人志趣，做过五年牙医——这段经历后来被他写进随笔里，成为他"弃医从文"的直接契机。1983年他开始写小说，1987年以《十八岁出门远行》成名，1988年鲁迅文学院与北师大中文系合办的研究生班毕业。他是<strong>中国先锋派小说的代表人物</strong>，与叶兆言、苏童等人齐名，1980年代的作品如《现实一种》《世事如烟》《河边的错误》以暴力的冷静、叙事的极端实验震动文坛。</p>
+      <p>1990年代是余华创作生涯的转折期。他自称"从愤怒和冷漠的作家，转向了一位寻找真理、排斥道德判断的作家"——先锋派的形式实验让位于朴素、内敛、近乎白描的现实主义。转型之作即《活着》（1993年在《收获》杂志刊出，1994年由长江文艺出版社出版，作家出版社2012年再版）。此后他又写出《许三观卖血记》（1995）、《兄弟》（2005-2006）和长篇《文城》（2021），作品被翻译成英、法、德、意、日、韩、俄等三十多个国家和地区出版。</p>
+      <p>国际声誉上，余华2004年凭《活着》获得法兰西艺术和骑士文化勋章，意大利格林扎纳·卡佛文学奖、澳大利亚詹姆斯·乔伊斯基金会奖等接踵而至；2022年获塞尔维亚"托尔斯泰文学钥匙奖"。余华的写作风格以"零度写作"著称——把最残酷的事件用最平静的语气讲出来，把最温情的情节写得像日常一样。他自己解释这种腔调来自《老黑奴》这首歌："歌中那位老黑奴经历了一生的苦难，家人都先他而去，而他依然友好地对待世界，没有一句抱怨的话。这首歌深深打动了我。"（据前言与公开资料综合）</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">IV</span>全书结构与故事梗概</h2>
+      <p>作为虚构作品，本书没有传统意义上的"论点"，而是一条贯穿二十世纪中国农村的<strong>个人命运—家庭兴衰—历史事件</strong>三线交织主线。</p>
+
+      <h3>故事梗概</h3>
+      <p>故事由一位采风青年在乡间偶然遇到的老农"福贵"开场。老人给自己唯一的名字也叫"福贵"的老牛加油——他骗牛说还有别的牛也在耕田，这样牛才不会觉得孤单。随后，福贵开始讲述自己。</p>
+      <p>他是徐家独子，父亲是地主，他从小不可救药，吃喝嫖赌，骑在妓女身上向岳父请安，最后把父亲抵押出去的一百多亩地和房子输给了龙二。父亲在搬进茅屋的第三天从粪缸上摔下而死；他挑着铜钱去城里还债，才第一次知道钱来得千难万难。丈人用花轿把怀孕的家珍接走，只留下凤霞。家珍在有庆半岁时带着孩子走了十多天夜路回来。福贵租了龙二五亩田，靠笨鸟多飞养活母亲和凤霞。</p>
+      <p>进城请郎中为母亲看病时，他被国民党军队抓了壮丁，在安徽被围的坑道里过了近一年，亲眼看着伤号成片死去、老全中弹、春生被俘虏。两年后他回到家乡，母亲已病故，凤霞发高烧成了聋哑人。龙二因解放后成了地主被枪毙，福贵感叹"我是替自己死里逃生"。</p>
+      <p>人民公社成立，家珍得了软骨病。有庆养了两头羊、跑步长跑、给羊割草喂料，十岁替姐姐上学割草磨穿了鞋；五年级时他为了救县长夫人（正是当年的战友春生）献血，被抽血抽干而死。福贵杀不了县长，只能偷偷在父母坟前埋掉儿子。家珍病中挨过医生"不出一个月"的判词，又活下来，为凤霞操办婚事。凤霞嫁给城里搬运工万二喜，生下一个儿子取名"苦根"——凤霞因大出血死在产房，与有庆死在同一家医院。三年后家珍也死了。</p>
+      <p>万二喜在工地上被四块水泥板夹死，只来得及喊一声"苦根"。外孙苦根随福贵回到村里，四岁那年因为难得吃到豆子、又赶上发烧，被豆子撑死。此后福贵攒钱买下一头要被宰的老牛，取名"福贵"，一人一牛在田里走完余生。</p>
+
+      <h3>核心冲突</h3>
+      <ul class="points">
+        <li><strong>"活着"与"活着之外的一切"</strong>——福贵不为光耀祖宗、不为发家致富、不为儿女孝顺而活，只为自己"活着本身"而活；这一哲学命题是他与命运之间唯一不可剥夺的立场。</li>
+        <li><strong>个人与历史</strong>——内战（被俘）、土改（龙二被毙）、大跃进/人民公社（煮钢铁、砸锅、饥荒）、文革（春生被斗、队长被押走），历史一次次碾过这个家庭，而福贵始终只是"承受者"。</li>
+        <li><strong>讲述与倾听</strong>——老人对"我"的自述构成一层叙事距离：讲述苦难的人没有哭，听的人几乎落泪。这一框架让残酷被"观看"，而不是被煽情。</li>
+      </ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">V</span>章节分析</h2>
+      <div class="note">EPUB 按 spine 分为 13 个正文单元 + 1 个版权页。其中"封面/简介"与"作者简介"属前置材料（不计入正文章节），"前言"为作者自序；正文共 12 章，按故事时间顺序为第一章至第十章。以下按 EPUB 单元逐一分析；原书为连续叙事、不分节，此处"章节"即叙事阶段。</div>
+
+      <div class="chapter" id="c1">
+        <h3><span class="ch-num">Chapter 00</span>采风者的午后 · 福贵登场</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>比"现在年轻十岁"的"我"下乡收集民间歌谣，在田埂上遇到正在开导老牛的福贵。老人用"二喜、有庆、家珍、凤霞、苦根"这些名字哄骗牛，说还有别的牛也在耕田——这样牛才不会孤单。"我"好奇问牛的名字，老人说只有"福贵"一个名字。"我"请他讲述自己，他全盘托出。</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵（讲述者，叙述中的"我"）；老牛"福贵"（唯一的听众与伙伴）；"我"（采风的年轻人，框架叙事）。</dd>
+          <dt>主题作用</dt>
+          <dd>确立全书叙事结构：一个框架（现在的老人 + 采风者）、一个视角（第一人称自述）、一个意象（老牛 = 福贵的镜像）。开篇"哄牛"的段落预告了全书的核心手法——用温情的方式讲最冷的事。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c2">
+        <h3><span class="ch-num">Chapter 00 · 前言</span>从《老黑奴》出发</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>余华自述：多年来他"以敌对态度看待现实"，内心愤怒渐渐平息后，意识到一位真正的作家"所寻找的是真理，是一种排斥道德判断的真理"。他听到美国民歌《老黑奴》，歌中的老黑奴经历一生苦难、家人先他而去，却仍友好地对待世界，没有一句抱怨。余华"决定写下一篇这样的小说，就是这篇《活着》"。</dd>
+          <dt>人物与关系</dt>
+          <dd>作者余华（第一人称）；《老黑奴》（叙事灵感来源，Stephen Foster 所作民谣）。</dd>
+          <dt>主题作用</dt>
+          <dd>前言是理解全书的钥匙：它明确了《活着》不是控诉、不是揭露，而是"对一切事物理解之后的超然，对善与恶一视同仁，用同情的目光看待世界"——这也解释了为什么通篇没有一个"坏人"，命运却把每个人都碾得粉碎。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c3">
+        <h3><span class="ch-num">Chapter 01</span>徐家少爷的荒唐岁月</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>倒叙回到四十多年前：福贵的祖父辈留下两百多亩地，父亲手里剩一百多亩。福贵从小不学好，雇工长根背着他去私塾，他念《千字文》时把"爹给你念一段"说反了；长大后穿丝绸、钻妓院、去青楼，骑在胖妓女背上经过米行向岳父陈老板请安。家珍怀有孕仍被福贵打骂，被龙二设局——沈先生输给了龙二，龙二成了赌场师傅。福贵最后一次赌博，龙二用灌了水银的骰子赢走了徐家一百多亩地和房产。</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵（浪荡少爷）；父亲（败家子的对照）；家珍（陈记米行千金，怀孕仍不离不弃）；凤霞（4岁）；有庆（尚未出生）；龙二（设局者）；沈先生（老赌徒，输后消失）；长根（老雇工）。</dd>
+          <dt>主题作用</dt>
+          <dd>开篇即给出"浪荡—败家—内疚—赎罪"的道德弧线。父亲输掉的一百多亩地是徐家由盛转衰的临界点；家珍四次被打仍跪地不起，为全书"忍耐/承受"的女性叙事定调。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c4">
+        <h3><span class="ch-num">Chapter 02</span>龙二设局 · 父亲之死 · 家珍被接走</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>福贵输光后回家，父亲抵押房地还债，让他挑铜钱进城。父亲挑不动铜钱偏要铜钱不要银元，是要让儿子知道钱来得千难万难。父亲搬进茅屋第三天从粪缸上摔下而死。丈人用花轿把家珍接走，只留下凤霞；家珍临走回头看了福贵三次，凤霞想上轿被推下。福贵对家珍说"你可不要忘记我是你爹"，凤霞答"你也不要忘记我是凤霞"。</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵（挑钱赎罪、父亲之死的责任人）；父亲（用死亡完成最后一次教育）；家珍（被岳父强行带回）；凤霞（被留下的女儿）。</dd>
+          <dt>主题作用</dt>
+          <dd>"铜钱"与"粪缸"两个意象把抽象的"败家"具象化——父亲之死不是惩罚，而是福贵理解生活代价的开始。结尾父女对话是全书极温柔的一笔，与后面的连续死亡形成刺痛的对照。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c5">
+        <h3><span class="ch-num">Chapter 03</span>租田 · 家珍归来 · 被抓壮丁 · 战场</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>福贵租龙二五亩田，靠笨鸟多飞养活母亲与凤霞。家珍在有庆半岁时走了十多天夜路回来。福贵进城请郎中，与县太爷家仆人打架时被国民党连长抓壮丁。在安徽被围困的坑道里，他与老兵老全、娃娃兵春生一起熬过饥寒、抢大饼、扒胶鞋。老全被流弹打死；福贵与春生被俘，领了馒头和盘缠。他本可加入解放军摇船渡江，但因怕打仗、怕见不到家人，选择回家。</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵（佃户→壮丁→俘虏→归乡人）；母亲、家珍、凤霞、有庆；老全（战场上的"父亲"替代）；春生（战场上的"兄弟"）。</dd>
+          <dt>主题作用</dt>
+          <dd>"被抓壮丁"是福贵与历史第一次正面相撞，也是他与母亲、家珍、儿女之间最长的一次分离。战场段落用最平静的语气写最恐怖的事——几千伤号冻死、老全死在尸体堆里——把"活着"本身抬到哲学高度。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c6">
+        <h3><span class="ch-num">Chapter 04</span>母亲之死 · 龙二替死 · 凤霞被送人</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>福贵离家两个多月，母亲病故，凤霞发高烧成了聋哑人。龙二因解放后成了地主被枪毙五枪。福贵分得龙二原先租给他的五亩地，开始盘算"要好好活"。凤霞十七岁，有庆念到小学，为供有庆读书，两口子动了送走凤霞的念头。凤霞被一户人家领走后跑了回来，福贵背她送去又背她回来——"就是全家都饿死，也不送凤霞回去"。</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵（母亲之死、龙二之死的目击者）；母亲（临死不知儿子被抓）；凤霞（被送又逃回的女儿）；有庆（读书的种子）；家珍（软骨病初发）。</dd>
+          <dt>主题作用</dt>
+          <dd>龙二替死是余华对历史最冷的一笔——福贵若没赌，被毙的就是他。凤霞被送人/逃回的双重段落，为后面"凤霞难产而死"埋下最深痛的伏笔：这个孩子从童年起就在"被留下/被带走"之间挣扎。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c7">
+        <h3><span class="ch-num">Chapter 05</span>人民公社 · 煮钢铁 · 家珍病重</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>五八年人民公社化，家珍的田被划归集体，锅被砸，两头羊被充公。有庆偷偷割草喂公社的羊，队长放他晚上抱一抱。村里请风水先生看中福贵家茅屋煮钢铁，家珍用面子才保住。汽油桶煮钢铁，有庆提议"要不放水，桶底先烂"——阴差阳错煮出一锅"钢"上县报喜。家珍因挑羊粪摔倒，确诊为软骨病。饥荒来临，四十斤米吃完，家珍把父亲牙缝里挤出的米藏在胸口带回家。有庆因给羊割草、上学迟到，被福贵打。</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵、家珍、凤霞、有庆、王喜（饲养员/后任队长）、队长、王先生（风水先生）。</dd>
+          <dt>主题作用</dt>
+          <dd>大跃进、人民公社、饥荒被压进一个普通家庭的生活细节里——砸锅、烧屋、米藏在胸口。家珍软骨病是余华给那个年代女性身体写下的一行注脚：她们既要在田里挣工分，又要在床上缝衣、藏米、挨饿。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c8">
+        <h3><span class="ch-num">Chapter 06</span>有庆之死 · 家珍病笃 · 春生重逢</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>县长夫人难产大出血，学校组织学生献血。有庆跑第一个到，被抽血抽干而死。福贵冲进医院打医生，被体育老师拦下。县长赶来——竟是春生。福贵想杀他，春生一句话让他下不去手。福贵把有庆偷偷埋在父母坟前，对家珍谎称"儿子在城里养病"。家珍夜夜听他脚步声，知道了真相。公社医生断言家珍"出不了一个月"，家珍却慢慢好了。福贵因悲伤过度倒下，头发全白。</dd>
+          <dt>人物与关系</dt>
+          <dd>有庆（长跑名将，为县长夫人献血而死，13岁）；春生（刘县长，当年的战友，如今成为间接凶手）；家珍（"有庆不会在这条路上跑来了"）；体育老师（唯一陪着福贵哭的人）。</dd>
+          <dt>主题作用</dt>
+          <dd>有庆之死是全书情感冲击最强的一段——一个善良、跑步、割草喂羊的孩子，死于一句"血不够"的官僚逻辑。春生与福贵的重逢（杀不了、下不去手）把私人恩怨与历史错位压在同一场景里。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c9">
+        <h3><span class="ch-num">Chapter 07</span>家珍弥留 · 凤霞出嫁 · 文革阴影</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>家珍身体好转，为凤霞操心婚事。福贵托队长找婆家，队长介绍了一个偏头搬运工万二喜。万二喜第一次上门嫌家穷，第二次带人、石灰、猪头、酒来给凤霞家翻屋顶、粉墙，正式提亲。凤霞嫁进城，家珍在家数着日子。文革席卷，队长因"走资派"被红卫兵押走三天；春生被游街批斗，深夜来告别"不想活了"。家珍从床上喊："春生，你要活着""你还欠我们一条命，你就拿自己的命来还吧。"春生走后一个多月，上吊自杀。</dd>
+          <dt>人物与关系</dt>
+          <dd>家珍（"死得很好，干干净净"的临终姿态）；凤霞（终于有了家）；万二喜（实心眼女婿）；春生（被历史碾过，欠福贵一条命）；队长（从保护者变成被押者）。</dd>
+          <dt>主题作用</dt>
+          <dd>万二喜二上门的段落是全书唯一的暖色，为的是让后面的死更刺心。春生之死与家珍的宽恕构成余华对文革最简省的一笔记录——不控诉，只陈述，但读者无法不痛。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c10">
+        <h3><span class="ch-num">Chapter 08</span>凤霞难产 · 万二喜之爱 · 苦根出生</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>凤霞怀孕，二喜夏天为让凤霞睡好，自己躺到床上喂蚊子。凤霞冬天分娩，二喜跪求医生"救凤霞，我要凤霞"。孩子生下来，凤霞大出血死在产房。二喜抱着儿子来见丈人丈母，家珍给孩子取名"苦根"——"生下来没有了娘"。凤霞和有庆葬在一起。二喜因悲伤过度话更少了，只有见到福贵才多说几句。</dd>
+          <dt>人物与关系</dt>
+          <dd>凤霞（死于生产，与有庆死在同一家医院）；二喜（"我只有这点想想凤霞的福份"）；苦根（外孙，生来无娘）；家珍（为孩子取名、操办丧事）。</dd>
+          <dt>主题作用</dt>
+          <dd>凤霞之死是全书的对称收束——她从童年被送人、逃回、终于出嫁、又死在产床上，走完了一个"最苦的孩子最善良的心"的一生。有庆死于"别人的孩子"，凤霞死于"自己的孩子"，医院作为死亡的公共空间被反复点名。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c11">
+        <h3><span class="ch-num">Chapter 09</span>家珍之死 · 二喜之死 · 苦根被带回村</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>家珍在凤霞死后不到三个月去世，死前说"下辈子我们还要在一起过""你还得好好活下去"。福贵把二喜和苦根接到城里住。二喜当搬运工，用背兜背苦根拉板车，因买蚊帐欠债。四岁那年，二喜被四块水泥板夹死，只来得及喊一声"苦根"。福贵赶到医院，一见那间躺过有庆和凤霞的小屋就摔在地上。他把苦根带回村里，用九分钱买了一碗小面，苦根说"明天再来吃好吗"。</dd>
+          <dt>人物与关系</dt>
+          <dd>家珍（"心也定了，做人能做成这样我该知足了"）；二喜（"爹，我离不了苦根"）；苦根（四岁失去爹）；福贵（外祖父）。</dd>
+          <dt>主题作用</dt>
+          <dd>家珍之死是徐家最后一代女主人的谢幕，她的"下辈子还要在一起"是对全书命运唯一一次主动的反驳。二喜之死把"水泥板""医院""喊儿子"三个意象拧在一起——一个靠劳动吃饭的偏头搬运工死于他最熟练的工具。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c12">
+        <h3><span class="ch-num">Chapter 10</span>苦根之殇 · 买牛 · 结尾</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>包产到户后福贵与苦根分到一亩半地，苦根成为小帮手。福贵攒钱买牛，路过晒场看到一头要被宰的老牛在掉眼泪，心一软把它买下。牛取名"福贵"。一人一牛在田里走过，老人对牛说："今天有庆，二喜耕了一亩，家珍，凤霞耕了也有七、八分田，苦根还小都耕了半亩。" 老人唱起歌谣："少年去游荡，中年想掘藏，老年做和尚。"</dd>
+          <dt>人物与关系</dt>
+          <dd>福贵（送走所有亲人后的最后一人）；老牛"福贵"（镜像与伴侣）；苦根（已在上一章死去，但老人仍以他的名字哄牛）。</dd>
+          <dt>主题作用</dt>
+          <dd>全书的最后一段是"以笑写哭"的极致：老人把死去的亲人都当作还在耕田的牛来哄，实际上是在哄自己。结尾一句"土地召唤着黑夜来临"，把个人的承受放进更广阔的天地里，让"活着"这件事从私人悲剧升华为一种普遍的、土地般的存在。</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">VI</span>金句摘录</h2>
+      <ol class="quotes">
+        <li>
+          人是为活着本身而活着的，而不是为了活着之外的任何事物所活着。
+          <span class="src">前言 · 全书的哲学主轴</span>
+        </li>
+        <li>
+          老人黝黑的脸在阳光里笑得十分生动，脸上的皱纹欢乐地游动着，里面镶满了泥土，就如布满田间的小道。
+          <span class="src">Chapter 01 · 开篇的福贵</span>
+        </li>
+        <li>
+          "做人不能忘记四条，话不要说错，床不要睡错，门槛不要踏错，口袋不要摸错。"
+          <span class="src">Chapter 07 · 福贵给牛讲的"做人的道理"</span>
+        </li>
+        <li>
+          有庆躺在坑里，越看越小，不像是活了十三年，倒像是家珍才把他生出来。
+          <span class="src">Chapter 07 · 埋葬有庆</span>
+        </li>
+        <li>
+          家珍死得很好，死得平平安安，干干净净，死後一点是非都没留下，不像村里有些女人，死了还有人说闲话。
+          <span class="src">Chapter 09 · 福贵谈家珍之死</span>
+        </li>
+        <li>
+          家珍说：你还欠我们一条命，你就拿自己的命来还吧。
+          <span class="src">Chapter 07 · 家珍对春生的最后宽恕</span>
+        </li>
+        <li>
+          少年去游荡，中年想掘藏，老年做和尚。
+          <span class="src">Chapter 10 · 老人唱给自己的歌</span>
+        </li>
+        <li>
+          我知道黄昏正在转瞬即逝，黑夜从天而降了。我看到广阔的土地袒露着结实的胸膛，那是召唤的姿态，就像女人召唤着她们的儿女，土地召唤着黑夜来临。
+          <span class="src">Chapter 10 · 全书最后一段</span>
+        </li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VII</span>批判性思考与延伸</h2>
+
+      <h3>优点与局限</h3>
+      <ul class="points">
+        <li><strong>文学成就</strong>：把"承受"写成一种主动的、近乎崇高的姿态，而不是被动的忍受。余华用极简短、极克制的白话，把一个家庭的连续死亡写成可以被讲述、被倾听、被传承的故事；不控诉、不煽情，反而让读者自己承担重量。这种"零度叙事"是中国当代文学里极具辨识度的一种声音。</li>
+        <li><strong>历史厚度</strong>：内战、土改、大跃进、人民公社、文革，每一个历史事件都被压缩进一个农民家庭的日常细节里——一块铜钱、一碗米、一只羊、一头牛——使大历史获得了可以触摸的肉身。</li>
+        <li><strong>局限</strong>：全书几乎没有一个"坏人"，命运被高度抽象化、寓言化；历史批判因此变得间接，读者若不熟悉20世纪中国农村，可能难以完全进入。此外，女性的苦难虽然被反复书写（家珍、凤霞），但她们几乎没有"选择"——只是承受、牺牲、死亡，在当代性别视角下值得重新讨论。</li>
+      </ul>
+
+      <h3>适合 / 不适合的读者</h3>
+      <ul class="points">
+        <li><strong>适合</strong>：对当代中国文学、现实主义叙事、民间歌谣、家庭史诗感兴趣的读者；经历或见证过亲人离去、希望重新思考"活着"意义的人；有余华其他作品（《许三观卖血记》《兄弟》）阅读经验、想比较他转型前后风格的读者。</li>
+        <li><strong>不太适合</strong>：偏好强情节、快节奏、明确"坏人/好人"判断的读者；对苦难叙事可能产生抵触、需要更多"希望感"的读者（这本书几乎没有希望感，只有承受）。</li>
+      </ul>
+
+      <h3>互为补充 / 对照的书</h3>
+      <ul class="points">
+        <li><strong>《许三观卖血记》</strong>（余华）：同一作者的另一部现实主义代表作，风格同样朴素，但更聚焦于一个家庭通过"卖血"反复渡过危机的循环——可与《活着》对照读。</li>
+        <li><strong>《兄弟》</strong>（余华）：上部同样写苦难，但加入了更荒诞、更极端的先锋派笔法，可观察余华从《活着》到《兄弟》风格上的摇摆。</li>
+        <li><strong>《平凡的世界》</strong>（路遥）：同样写20世纪中国农村青年的奋斗，但更强调理想主义与集体主义，可与《活着》的"承受"对照。</li>
+        <li><strong>《活着》英译本 <em>To Live</em></strong>（Michael S. Duke 译）：余华作品最早走向世界的译本之一，译者在序言中把福贵与海明威《老人与海》并置，可对照阅读。</li>
+        <li><strong>《老黑奴》</strong>（Stephen Foster）：余华在自序中点名的灵感来源，一首关于承受与和解的美国民谣。</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">活着</div>
+  To Live · 余华 · 读书笔记 · 生成于 2026
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

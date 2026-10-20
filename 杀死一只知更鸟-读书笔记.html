@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>杀死一只知更鸟 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #6b4a2b;
+    --accent-soft: #f0e6d6;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(255,200,140,.22), transparent 60%), linear-gradient(180deg, #2a1a10 0%, #5a3a22 100%);
+    --hero-text: #f3e8d4;
+    --hero-subtitle: rgba(243,232,212,.72);
+    --hero-meta: rgba(243,232,212,.78);
+    --hero-accent: #e6b86a;
+    --hero-divider: rgba(243,232,212,.18);
+    --progress-gradient: linear-gradient(90deg, #6b4a2b, #b08d4f);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(255,180,110,.08), transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,150,90,.06), transparent 40%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans); font-size: 12px; letter-spacing: .4em;
+    color: var(--hero-accent); text-transform: uppercase;
+    margin-bottom: 20px; position: relative;
+  }
+  .hero h1 {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em; margin: 0 0 20px;
+    line-height: 1.2; color: var(--hero-text); position: relative;
+  }
+  .hero .subtitle {
+    font-family: var(--serif); font-style: italic;
+    font-size: 17px; color: var(--hero-subtitle);
+    letter-spacing: .1em; margin-bottom: 36px; position: relative;
+  }
+  .hero .meta {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px 22px; font-family: var(--sans); font-size: 13px;
+    color: var(--hero-meta); padding-top: 20px;
+    border-top: 1px solid var(--hero-divider); position: relative;
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1440px; margin: 0 auto;
+    padding: 48px 32px 96px;
+    display: grid; grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px; align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky; top: 24px; align-self: start;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+    padding-right: 16px; border-right: 1px solid var(--border); font-family: var(--sans);
+    font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px; letter-spacing: .3em; color: var(--text-muted);
+    text-transform: uppercase; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block; padding: 6px 0 6px 22px;
+    color: var(--text-soft); text-decoration: none;
+    position: relative; line-height: 1.5; transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc; position: absolute;
+    left: 0; color: var(--text-muted); font-size: 11px;
+    font-weight: 500; letter-spacing: .05em; top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif); font-size: 26px; font-weight: 700;
+    color: var(--text); margin: 0 0 28px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em; position: relative;
+  }
+  h2::after {
+    content: ""; position: absolute; left: 0; bottom: -2px;
+    width: 60px; height: 2px; background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block; font-family: var(--sans);
+    font-size: 13px; color: var(--accent); letter-spacing: .2em;
+    margin-right: 14px; font-weight: 500; vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif); font-size: 19px; font-weight: 600;
+    color: var(--text); margin: 36px 0 14px; padding-left: 14px;
+    border-left: 3px solid var(--gold); line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans); font-size: 11px; color: var(--accent);
+    letter-spacing: .2em; display: block; margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead { font-size: 18.5px; color: var(--text); line-height: 1.9; }
+
+  blockquote {
+    margin: 24px 0; padding: 20px 24px 20px 28px;
+    background: var(--quote-bg); border-left: 3px solid var(--accent);
+    color: var(--text-soft); font-style: italic;
+    border-radius: 0 4px 4px 0; position: relative;
+  }
+  blockquote::before {
+    content: "\201C"; position: absolute; top: 2px; left: 8px;
+    font-family: Georgia, serif; font-size: 48px; line-height: 1;
+    color: var(--accent-soft); pointer-events: none;
+  }
+  blockquote p { margin: 0 0 10px; position: relative; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote .src {
+    display: block; font-style: normal; font-family: var(--sans);
+    font-size: 12px; color: var(--text-muted); margin-top: 10px;
+    letter-spacing: .05em;
+  }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 20px 0;
+    font-family: var(--sans); font-size: 14.5px; background: var(--surface);
+    box-shadow: var(--shadow); border-radius: 6px; overflow: hidden;
+  }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: #f5f0e3; color: var(--text); font-weight: 600; font-size: 13px; letter-spacing: .1em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fbf8ef; }
+  td:first-child { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+
+  .chapter {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px 28px; margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06); }
+  .chapter h3 {
+    margin: 0 0 16px; padding: 0 0 12px;
+    border-left: none; border-bottom: 1px dashed var(--border); padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans); font-size: 11.5px; letter-spacing: .2em;
+    color: var(--accent); text-transform: uppercase; margin-top: 14px; margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px; position: relative; line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6"; position: absolute; left: 4px; top: 10px;
+    color: var(--gold); font-size: 10px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px; }
+  .tag {
+    display: inline-block; padding: 4px 12px;
+    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--sans); font-size: 12px; border-radius: 999px;
+    letter-spacing: .05em;
+  }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote; padding: 22px 24px 22px 64px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; margin-bottom: 14px; position: relative;
+    font-family: var(--serif); font-size: 16.5px; line-height: 1.9; color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute; left: 20px; top: 22px;
+    font-family: var(--serif); font-style: italic; font-size: 28px;
+    color: var(--accent); font-weight: 600;
+  }
+  .quotes .src {
+    display: block; font-family: var(--sans); font-size: 12px;
+    color: var(--text-muted); margin-top: 8px; letter-spacing: .05em;
+  }
+
+  .note {
+    font-family: var(--sans); font-size: 13px; color: var(--text-muted);
+    padding: 14px 18px; background: #f5f1e5; border-radius: 4px;
+    margin: 16px 0; line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 48px 0; }
+
+  footer {
+    text-align: center; padding: 40px 24px 60px; color: var(--text-muted);
+    font-family: var(--sans); font-size: 12.5px; letter-spacing: .1em;
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif); font-size: 22px; color: var(--accent);
+    letter-spacing: .3em; margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--accent); color: #fff; border: none;
+    cursor: pointer; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .2s, transform .2s; z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif); font-size: 3.4em; float: left;
+    line-height: .9; padding: 6px 10px 0 0;
+    color: var(--accent); font-weight: 700;
+  }
+
+  .cast-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 32px 32px 24px; box-shadow: var(--shadow); margin: 24px 0;
+  }
+  .cast-legend {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    font-family: var(--sans); font-size: 12.5px; color: var(--text-soft);
+    padding: 14px 18px; background: #f7f3ea; border-radius: 6px; margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block; width: 12px; height: 12px;
+    border-radius: 3px; vertical-align: middle; margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px; letter-spacing: .3em; color: var(--text-muted);
+    text-transform: uppercase; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 1px dashed var(--border);
+  }
+  .cast-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .cast-node {
+    flex: 0 0 auto; min-width: 140px; padding: 10px 14px;
+    background: #faf6ec; border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name { font-family: var(--serif); font-weight: 600; font-size: 15px; color: var(--text); line-height: 1.3; }
+  .cast-name .aka { font-weight: 400; font-size: 12px; color: var(--text-muted); margin-left: 4px; }
+  .cast-role { font-family: var(--sans); font-size: 12px; color: var(--text-soft); margin-top: 4px; line-height: 1.5; }
+  .cast-note { font-family: var(--sans); font-size: 12px; color: var(--text-muted); margin-top: 4px; font-style: italic; }
+  .cast-connector { text-align: center; color: var(--text-muted); font-size: 16px; margin: -8px 0 8px; }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>杀死一只知更鸟</h1>
+  <div class="subtitle">To Kill a Mockingbird · 一场关于正义、同理心与成长的南方审判</div>
+  <div class="meta">
+    <span><strong>类型</strong>虚构 / 成长小说 / 南方哥特</span>
+    <span><strong>作者</strong>哈珀·李</span>
+    <span><strong>译者</strong>（译林版）</span>
+    <span><strong>字数</strong>约 18.4 万字（正文）</span>
+    <span><strong>出版</strong>译林出版社 2017</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物关系与命名谱系</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与核心冲突</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">第一章</a></li>
+          <li><a href="#c2">第二章</a></li>
+          <li><a href="#c3">第三章</a></li>
+          <li><a href="#c4">第四章</a></li>
+          <li><a href="#c5">第五章</a></li>
+          <li><a href="#c6">第六章</a></li>
+          <li><a href="#c7">第七章</a></li>
+          <li><a href="#c8">第八章</a></li>
+          <li><a href="#c9">第九章</a></li>
+          <li><a href="#c10">第十章</a></li>
+          <li><a href="#c11">第十一章</a></li>
+          <li><a href="#c12">第十二章</a></li>
+          <li><a href="#c13">第十三章</a></li>
+          <li><a href="#c14">第十四章</a></li>
+          <li><a href="#c15">第十五章</a></li>
+          <li><a href="#c16">第十六章</a></li>
+          <li><a href="#c17">第十七章</a></li>
+          <li><a href="#c18">第十八章</a></li>
+          <li><a href="#c19">第十九章</a></li>
+          <li><a href="#c20">第二十章</a></li>
+          <li><a href="#c21">第二十一章</a></li>
+          <li><a href="#c22">第二十二章</a></li>
+          <li><a href="#c23">第二十三章</a></li>
+          <li><a href="#c24">第二十四章</a></li>
+          <li><a href="#c25">第二十五章</a></li>
+          <li><a href="#c26">第二十六章</a></li>
+          <li><a href="#c27">第二十七章</a></li>
+          <li><a href="#c28">第二十八章</a></li>
+          <li><a href="#c29">第二十九章</a></li>
+          <li><a href="#c30">第三十章</a></li>
+          <li><a href="#c31">第三十一章</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">1933 至 1935 年间，美国阿拉巴马州梅科姆镇。六岁的斯库特·芬奇与哥哥杰姆、伙伴迪尔，在父亲阿迪克斯——一名为黑人辩护的律师——的陪伴下，经历了一场从童年游戏到成人审判的成长之旅。当孩子们从对"怪人拉德利"的恐惧中走出时，真正的审判降临：汤姆·鲁宾逊，一个被白人少女指控强奸的黑人，被十二个白人陪审员定罪。而当镇上的暴力与私刑最终指向孩子时，拯救他们的，是那个被全镇恐惧的"怪人"。</p>
+      <p>小说以斯库特成年后的回忆展开。开篇是杰姆十三岁时左臂骨折的悬念，倒叙带出童年的全部故事。第一部以儿童视角为主：怪人拉德利的传说与神秘礼物、疯狗事件揭示阿迪克斯隐藏的"神枪手"身份、杜博斯太太的山茶花与死亡、以及汤姆·鲁宾逊案件的开庭。第二部则是法庭的高潮——从开庭、证人到陪审团的有罪判决，再到汤姆越狱被杀，最终指向万圣节夜里尤厄尔对兄妹俩的袭击与怪人拉德利的相救。</p>
+      <p>书名来自阿迪克斯的训诫：杀死一只知更鸟是罪恶，因为它们"只是哼唱美妙的音乐供人们欣赏，什么坏事也不做"。全书的核心是对"知更鸟"——无辜者——的隐喻：汤姆·鲁宾逊被法律的暴力杀死，怪人拉德利被公众的想象杀死，而杰姆和斯库特作为下一代，必须学会辨别谁是知更鸟、谁是猎枪。</p>
+      <div class="tags">
+        <span class="tag">成长小说</span>
+        <span class="tag">南方哥特</span>
+        <span class="tag">法庭文学</span>
+        <span class="tag">种族议题</span>
+        <span class="tag">道德教育</span>
+        <span class="tag">同理心</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+      <h2><span class="num">II</span>人物关系与命名谱系</h2>
+      <div class="cast-legend">
+        <span><span class="swatch" style="background:#2d5f8a"></span>男性</span>
+        <span><span class="swatch" style="background:#a04e7a"></span>女性</span>
+        <span><span class="swatch" style="background:#b08d4f"></span>其他 / 神秘人物</span>
+      </div>
+      <div class="cast-tree">
+        <div class="cast-gen">
+          <div class="cast-gen-label">芬奇家族 · 核心家庭</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">阿迪克斯·芬奇</div>
+              <div class="cast-role">父亲 · 律师 · "弹无虚发"的神枪手</div>
+              <div class="cast-note">全书道德核心，沉默的正义化身</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">杰姆·芬奇<span class="aka">杰瑞米·阿迪克斯</span></div>
+              <div class="cast-role">哥哥 · 12→13 岁 · 成长弧的主要承担者</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">斯库特·芬奇<span class="aka">琼·露易丝</span></div>
+              <div class="cast-role">叙述者 · 6→9 岁 · 全知童年的眼睛</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">杰克·芬奇<span class="aka">约翰·霍尔·芬奇</span></div>
+              <div class="cast-role">叔叔 · 医生 · 住在纳什维尔</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">芬奇家族 · 旁支</div>
+          <div class="cast-row">
+            <div class="cast-node female">
+              <div class="cast-name">亚历山德拉姑姑</div>
+              <div class="cast-role">阿迪克斯之妹 · 家族荣誉的捍卫者</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">吉米姑父</div>
+              <div class="cast-role">亚历山德拉之夫 · 沉默寡言</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">亨利·芬奇</div>
+              <div class="cast-role">亚历山德拉之子</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">弗朗西斯</div>
+              <div class="cast-role">亨利之子 · 8 岁 · 令人讨厌的亲戚</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">阿提克斯·芬奇<span class="aka">艾克叔公</span></div>
+              <div class="cast-role">南方联盟军老兵</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">西蒙·芬奇</div>
+              <div class="cast-role">家族祖先 · 来自康沃尔郡的皮货商</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">邻居与社区</div>
+          <div class="cast-row">
+            <div class="cast-node female">
+              <div class="cast-name">卡波妮</div>
+              <div class="cast-role">黑人女管家 · 芬奇家的真正守护者</div>
+              <div class="cast-note">首购教堂成员，受过良好教育</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">莫迪·阿特金森</div>
+              <div class="cast-role">隔壁寡妇 · 前布福德医生之女</div>
+              <div class="cast-note">孩子们的朋友，杰姆的追求者</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">斯蒂芬妮·克劳福德</div>
+              <div class="cast-role">长舌妇 · 拉德利家的消息源</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">杜博斯太太</div>
+              <div class="cast-role">恶毒的老太太 · 吗啡成瘾者</div>
+              <div class="cast-note">以死亡教会孩子们"真正的勇敢"</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">阿瑟·"怪人"·拉德利</div>
+              <div class="cast-role">被关在家中的"幽灵" · 全书最终的救赎者</div>
+              <div class="cast-note">真实姓名是阿瑟</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">内森·拉德利</div>
+              <div class="cast-role">怪人之兄 · "买棉花"的</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">老拉德利先生</div>
+              <div class="cast-role">怪人之父 · 故事开始前已故</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">艾弗里先生</div>
+              <div class="cast-role">隔壁老邻居 · 奇怪的老人</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">雷切尔·哈弗福特</div>
+              <div class="cast-role">迪尔的姨妈</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">汤姆·鲁宾逊案 · 主要人物</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">汤姆·鲁宾逊</div>
+              <div class="cast-role">被告 · 25 岁 · 三个孩子的父亲</div>
+              <div class="cast-note">左臂残疾，被错判死刑后越狱被杀</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">赫克·泰特</div>
+              <div class="cast-role">警长 · 43 岁 · 主持真相与隐瞒的对抗</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">泰勒法官</div>
+              <div class="cast-role">主审法官 · 选派阿迪克斯辩护</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">吉尔莫先生</div>
+              <div class="cast-role">控方检察官</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">海伦·鲁宾逊</div>
+              <div class="cast-role">汤姆之妻 · 三个孩子的母亲</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">马耶拉·维奥莉特·尤厄尔</div>
+              <div class="cast-role">控方证人 · 19 岁半 · 实际上的强奸受害者</div>
+              <div class="cast-note">父亲家暴的受害者，反咬汤姆</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">鲍勃·尤厄尔</div>
+              <div class="cast-role">马耶拉之父 · 真正的施暴者</div>
+              <div class="cast-note">左撇子，啐阿迪克斯脸，万圣节夜袭孩子</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">塞克斯牧师</div>
+              <div class="cast-role">首购教堂牧师 · 汤姆的教会成员</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">其他重要人物</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">查尔斯·贝克·"迪尔"·哈里斯</div>
+              <div class="cast-role">伙伴 · 来自默里迪恩</div>
+              <div class="cast-note">两次离家出走，敏感而早慧</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">布拉克斯顿·安德伍德</div>
+              <div class="cast-role">《梅科姆论坛》编辑</div>
+              <div class="cast-note">用社论"杀死知更鸟"评论汤姆之死</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">多尔夫斯·雷蒙德</div>
+              <div class="cast-role">与黑女人生活的白人 · 混血儿之父</div>
+              <div class="cast-note">故意装醉以博取社会"理解"</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">林克·迪斯</div>
+              <div class="cast-role">杂货店老板 · 汤姆的雇主</div>
+              <div class="cast-note">保护海伦免受尤厄尔骚扰</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">沃尔特·坎宁安</div>
+              <div class="cast-role">穷苦白人孩子 · 老塞勒姆人</div>
+              <div class="cast-note">双重表亲，陪审团中的"不确定性"</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">雷诺兹医生</div>
+              <div class="cast-role">家庭医生</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>命名规律与关键提示：</strong>阿迪克斯的两个儿子分别叫"杰瑞米·阿迪克斯"（纪念阿迪克斯）和"琼·露易丝"（纪念阿迪克斯的母亲）；阿瑟是怪人拉德利的真实姓名，他终生被"怪人"的绰号遮蔽；坎宁安家有"坎宁安"与"康宁安"两拼写分支的家族故事，泰勒法官曾为此头痛九小时。斯库特在故事开头称父亲为"阿迪克斯"，杜博斯太太纠正她应称"芬奇先生"。
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">III</span>作者简介</h2>
+      <p>哈珀·李（Harper Lee, 1926–2016），美国小说家，生于阿拉巴马州门罗维尔（Monroeville）。其父阿马萨·科尔曼·李（Amasa Coleman Lee）是律师兼阿拉巴马州立法委员，正是阿迪克斯·芬奇的原型；母亲出身种植园主家庭。李在阿拉巴马大学攻读法律，后转至牛津大学，1949 年返美后做过美国航空票务代理、英国海外航空公司雇员，并开始写作。</p>
+      <p>1957 年，李完成长篇小说《Go Set a Watchman》（守望者），其出版代理人将其否决，建议她另写一本"小姑娘视角"的书。李遂以童年记忆为素材，于 1960 年出版《杀死一只知更鸟》（To Kill a Mockingbird）。该书于 1961 年获普利策小说奖，至今被翻译成四十余种语言，全球销量逾四千万册，是美国中学课堂与公共讨论中的常备文本。</p>
+      <p>《守望者》迟至 2015 年才出版，其中年老的斯库特作为陪审员旁听一场针对黑人牧师的私刑审判，阿迪克斯被描绘成一个"维护种族隔离"的前隔离主义者和三K党同情者。这一"反转"引发巨大争议，但学界普遍认为《守望者》是《杀死一只知更鸟》的初稿，不应作为李本人的成熟立场。2016 年 2 月 19 日，李在门罗维尔家中去世，享年 89 岁。</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">IV</span>全书结构与核心冲突</h2>
+      <p>原书分为"第一部"和"第二部"，共 31 章。第一部以儿童视角展开小镇生活与拉德利家谜团；第二部以汤姆·鲁宾逊审判为核心，将道德冲突推至顶点。叙事结构呈"倒叙 + 双线交织"：开篇杰姆骨折的悬念贯穿全书，直到最后一章才由斯库特揭示怪人拉德利的救人。</p>
+
+      <h3>故事梗概</h3>
+      <p>1933 年夏，六岁的斯库特与哥哥杰姆迎来伙伴迪尔。三个孩子试图引"怪人拉德利"出洞，却屡屡受挫。1934 年，他们在拉德利家老橡树的树洞里发现一系列神秘礼物：口香糖、香皂娃娃、奖牌、表与小刀——这些礼物在杰姆试图归还时被内森·拉德利用水泥封死树洞，但孩子们已经隐约猜到赠礼者是谁。</p>
+      <p>1935 年，阿迪克斯接下为黑人汤姆·鲁宾逊辩护的案子，镇上舆论哗然。杰姆出于对杜博斯太太的义愤，毁了她的山茶花；作为惩罚，他每天下午为她朗读《艾凡赫》。杜博斯太太死前留下杰姆一枝山茶花，并让阿迪克斯转告他："她是我见过的最勇敢的人。"——勇敢不是手里有枪，而是明知会输仍坚持到底。</p>
+      <p>同年冬天，阿迪克斯在自家门口击毙疯狗蒂姆·约翰逊，向孩子们揭示他隐藏多年的"弹无虚发"神枪手身份。莫迪小姐向杰姆解释：阿迪克斯放下枪，是因为他意识到"好枪法是上天赐予的天赋，射击不同于弹钢琴"，他不愿用这份才能对地球上大部分生命施加不公。</p>
+      <p>庭审是全书高潮。控方证人尤厄尔父女的证词漏洞百出——马耶拉右眼乌青证明打人者是左撇子，而汤姆左臂残疾，是右手使不上力。但十二个白人陪审团仍然裁定汤姆有罪。汤姆在阿迪克斯上诉期间越狱，被警长射杀。安德伍德在《梅科姆论坛》发表社论，把汤姆比作被"猎人和无知孩童愚蠢地杀戮的鸣禽"——知更鸟。</p>
+      <p>万圣节夜，鲍勃·尤厄尔报复袭击斯库特和杰姆，杰姆骨折。怪人拉德利从阴影中现身，将尤厄尔刺死，救了两个孩子。警长赫克·泰特坚持认为尤厄尔"自己倒在刀口上"，拒绝让怪人成为公众焦点——这是对阿迪克斯"诚实"原则的一次温柔修正。小说结尾，斯库特送阿瑟回家，第一次从他的角度看待世界，站在拉德利家的门廊上，她终于明白：你永远不可能真正了解一个人，除非你钻进他的皮肤里，像他一样走来走去。</p>
+
+      <h3>核心冲突</h3>
+      <ul class="points">
+        <li><strong>法律程序 vs 实质正义</strong>——阿迪克斯在法庭上几乎完美无缺，但陪审团仍以肤色定罪。法律是平等的，陪审团不是。</li>
+        <li><strong>同理心 vs 群体偏见</strong>——阿迪克斯要求孩子"钻进别人的皮肤"，而梅科姆镇的社会结构却要求他们按肤色、家族、阶级把人归类。</li>
+        <li><strong>真相 vs 体面</strong>——泰特警长为保护怪人而向阿迪克斯隐瞒真相，这是对"诚实"教育的一次反向修正，让阿迪克斯最终承认"让死者埋葬死者"。</li>
+        <li><strong>童年的纯真 vs 成人的世界</strong>——斯库特与杰姆在故事中逐渐从儿童游戏过渡到成人创伤，但迪尔的眼泪和杰姆的愤怒成为他们成长的代价。</li>
+      </ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">V</span>章节分析</h2>
+      <div class="note">
+        本 EPUB 共 31 个正文单元（EPUB 4–14 + 16–35），对应原书"第一部"11 章 + "第二部"20 章。每章控制在 3 个 dt 分组内：关键情节 / 核心论点 / 主题作用。EPUB 单元编号与原书章数完全一致，章节标题除"第一部""第二部"外均为原书所有。
+      </div>
+
+      <div class="chapter" id="c1">
+        <h3><span class="ch-num">Chapter 01</span>开篇倒叙与家族历史</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>杰姆十三岁时左肘骨折。斯库特坚持认为一切源于尤厄尔家，杰姆认为从迪尔来那年夏天就开始了——当迪尔怂恿他们引怪人拉德利出来时，事情就开始了。阿迪克斯裁决两人都对。家族历史展开：祖先西蒙·芬奇是康沃尔郡的皮货商，在亚拉巴马创立芬奇庄园；阿迪克斯是第一个学法律的人，放弃棉花田；母亲两岁时去世；卡波妮是黑人女管家；迪尔首次登场；拉德利家传说铺陈——阿瑟·"怪人"·拉德利十五年被锁在家中。</dd>
+          <dt>人物与关系</dt>
+          <dd>斯库特（6 岁）与杰姆（12 岁）的兄妹关系；阿迪克斯作为道德锚点；卡波妮作为事实上的母亲；迪尔作为"夏天的礼物"。</dd>
+          <dt>主题作用</dt>
+          <dd>确立"回忆的童年"叙事视角与"拉德利家谜团"主线，为全书设定哥特式悬念；家族历史让"芬奇"成为梅科姆镇的代际坐标。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c2">
+        <h3><span class="ch-num">Chapter 02</span>开学第一天与沃尔特·坎宁安</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>斯库特被老师卡罗琳小姐认为"已识字"，被禁止在家中学；卡罗琳小姐想给穷孩子沃尔特·坎宁安买午餐，沃尔特三次拒绝。斯库特替他解释："沃尔特是个坎宁安家的人。"阿迪克斯解释坎宁安家以物抵债的传统：木柴、山胡桃、芜菁叶。卡罗琳小姐认为斯库特"干扰教学"，用尺子打了她手心。</dd>
+          <dt>核心论点</dt>
+          <dd>阿迪克斯提出全书的同理心原则："你永远也不可能真正了解一个人，除非你钻进他的皮肤里，像他一样走来走走去。"但阿迪克斯也妥协：与斯库特约定继续每晚读书看报，但避免让卡罗琳小姐发现。</dd>
+          <dt>主题作用</dt>
+          <dd>通过"午餐事件"让斯库特第一次面对"中产教师的善意"与"乡村的尊严"之间的冲突；奠定全书"站在对方角度思考"的训诫。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c3">
+        <h3><span class="ch-num">Chapter 03</span>巴里斯·尤厄尔与妥协的智慧</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>同学巴里斯·尤厄尔只在开学第一天来学校，身上有虱子；卡罗琳小姐命他回家用碱皂洗头。尤厄尔一家三代靠救济金生活，住在垃圾场后的破屋里。晚上，阿迪克斯向斯库特解释：尤厄尔家是被默许的"封闭群体"，可以享特权——例如不必上学，鲍勃·尤厄尔可在禁猎季打猎。阿迪克斯与斯库特达成"上学 + 每晚读书"的妥协。杰姆爬树屋事件收尾。</dd>
+          <dt>核心论点</dt>
+          <dd>"妥协"——彼此退让、达成一致意见——是阿迪克斯的政治哲学：在无法改变尤厄尔家的情况下，接受现实，但保持自己的尊严。</dd>
+          <dt>主题作用</dt>
+          <dd>引入"尤厄尔家"这一核心他者，为第二部的种族与阶级冲突埋下伏笔；尤厄尔家的"特权"与芬奇家的"原则"形成对照。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c4">
+        <h3><span class="ch-num">Chapter 04</span>树洞的口香糖与硬币</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>斯库特在拉德利家老橡树树洞里发现两片口香糖；杰姆发现一个装着两枚旧硬币的紫天鹅绒小盒。杰姆推测这是拉德利先生藏东西的地方，决定把硬币留到开学再问是谁的。杰姆策划"怪人拉德利"戏剧，用缝纫机剪刀假装刺人，被阿迪克斯撞见。阿迪克斯禁止他们再靠近拉德利家。斯库特滚轮胎撞到拉德利家台阶，第一次"听见屋子里有人在笑"。</dd>
+          <dt>主题作用</dt>
+          <dd>树洞作为"怪人"与孩子们之间的非语言沟通渠道被正式建立；剪刀刺人的戏剧为后来"剪刀"成为杜博斯太太的隐喻埋下伏笔；阿迪克斯的禁令是父权的温和边界。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c5">
+        <h3><span class="ch-num">Chapter 05</span>送"信"行动与莫迪小姐的智慧</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>杰姆、迪尔、斯库特策划用鱼竿把信送进拉德利家的百叶窗。阿迪克斯撞见他们，杰姆暴露。阿迪克斯的"律师圈套"——你原以为自己想当律师——让杰姆深受打击。莫迪小姐成为斯库特的智慧导师：她解释老拉德利是浸信会教徒，认为户外享乐是罪；"斯蒂芬妮小姐的四分之三是谣言，四分之一是斯蒂芬妮自己的"。莫迪小姐评价阿瑟："即使他原来没疯的话，现在也差不多了。"斯库特第一次为怪人辩护："阿迪克斯对杰姆和我在家里和在外面一样。"</dd>
+          <dt>核心论点</dt>
+          <dd>阿迪克斯的禁令："喜欢追根究底的孩子"用在我们这种人身上算客气说法——尊重怪人的权利；同理心需要从理解怪人开始。</dd>
+          <dt>主题作用</dt>
+          <dd>莫迪小姐作为"真正的成年人"首次登场，她的怀疑主义（不信拉德利家传说）与阿迪克斯的克制共同构成全书的成人声音。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c6">
+        <h3><span class="ch-num">Chapter 06</span>夜窥拉德利家与杰姆的裤子</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>迪尔离开前最后一晚，三个孩子夜探拉德利家后院。他们透过百叶窗看见一个男人影；返回途中被内森·拉德利的枪声惊散，杰姆丢了裤子。杰姆深夜溜回拉德利家找回裤子——发现裤子被叠得整整齐齐放在篱笆上，还缝好了。杰姆第一次"颤抖"：这像是有人知道他想干什么。</dd>
+          <dt>核心论点</dt>
+          <dd>怪人拉德利的"读心术"——他知道孩子们会回来，所以提前把裤子缝好——是全书怪人从"幽灵"转向"真实的人"的关键证据。</dd>
+          <dt>主题作用</dt>
+          <dd>孩子们的恐惧开始被一种"被关注"的奇异感觉替代；杰姆的裤子成为怪人善意的第一个物证。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c7">
+        <h3><span class="ch-num">Chapter 07</span>树洞礼物系列与内森的水泥</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>树洞里陆续出现灰色麻线、两个香皂娃娃（杰姆与斯库特的样子）、一整包口香糖、一块拼写奖牌、一只不会走的怀表和铝质小刀。杰姆无法解释，决定写信托他们转交。第二天，他们发现树洞被内森·拉德利用水泥封死——内森说"那棵树快要死了"。杰姆质疑：树叶那么绿，怎么可能死？晚上杰姆躲在门廊哭泣。阿迪克斯说："拉德利先生肯定比我们更了解他自己的树。"杰姆第一次意识到大人也会撒谎。</dd>
+          <dt>主题作用</dt>
+          <dd>树洞的封闭是怪人"被切断联系"的物理隐喻；杰姆的哭泣是他童年终结的开始，他第一次看清成人世界的善与恶并不总是对立的。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c8">
+        <h3><span class="ch-num">Chapter 08</span>雪、雪人艾弗里与莫迪小姐的火灾</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>罕见的大雪，杰姆堆了一个雪人，用莫迪小姐的太阳帽和修枝剪装饰，阿迪克斯让它"乔装改扮"以免诽谤艾弗里先生。夜里莫迪小姐家失火，阿迪克斯命令孩子们站在拉德利家门前，自己冲进火场。杰姆向阿迪克斯"竹筒倒豆子"坦白一切：树洞、他的裤子、内森封洞——"他从来没有伤害过我们。"阿迪克斯温和地揭示：怪人趁救火混乱给斯库特披上毯子，斯库特竟然没发现。</dd>
+          <dt>核心论点</dt>
+          <dd>怪人的善意是"无声的"——他救了斯库特，但她完全不知道；这种"不被察觉的善意"是怪人性格的核心，也是后来泰特警长保护他的逻辑起点。</dd>
+          <dt>主题作用</dt>
+          <dd>怪人从"幽灵"转向"守护者"；火灾作为小镇共同体的考验，阿迪克斯的冷静与莫迪小姐的乐观（"我打算盖个小房子，招两个房客"）形成对照。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c9">
+        <h3><span class="ch-num">Chapter 09</span>阿迪克斯接下汤姆·鲁宾逊的案子</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>同学塞西尔·雅各布斯说阿迪克斯"替黑鬼辩护"，斯库特第一次动手——但这次她放下拳头走开。圣诞节，弗朗西斯骂阿迪克斯是"同情黑鬼的人"，斯库特与他扭打，被杰克叔叔按在地上。她向杰克叔叔解释：弗朗西斯骂阿迪克斯，她受不了。杰克叔叔向阿迪克斯承认自己"劈头盖脸责骂"斯库特是不对的。阿迪克斯告诉杰克叔叔：他祈祷自己能把孩子们"渡过这道难关……别让他们染上梅科姆的通病"。阿迪克斯希望"他们来向我寻求答案，而不是听镇上的人议论纷纷"。</dd>
+          <dt>核心论点</dt>
+          <dd>"同情黑鬼的人"是无意义的称呼；但阿迪克斯接受这一标签，因为"我尽自己所能去爱每一个人"。</dd>
+          <dt>主题作用</dt>
+          <dd>案件正式浮出水面；阿迪克斯的辩护不是政治策略，而是个人良知——他"不希望儿子将来为这件事恨他"。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c10">
+        <h3><span class="ch-num">Chapter 10</span>阿迪克斯是"弹无虚发"的神枪手</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>斯库特试图用枪瞄准莫迪小姐的屁股，阿迪克斯警告她。一个星期六，老猎犬蒂姆·约翰逊发疯冲进街区。警长泰特原本要射狗，但疯狗走到拉德利家院门前时，阿迪克斯接过枪，一枪毙狗。莫迪小姐向杰姆揭示：阿迪克斯年轻时是"弹无虚发"的神枪手，绰号"One-Shot芬奇"。莫迪解释他为何放下枪："好枪法是上天赐予的天赋……他也许是意识到上帝赋予他的才能对生活在地球上的大部分其他生命来说不公平，于是就把枪放下了。"阿迪克斯说："任何思维正常的人都不会恃才傲物。"</dd>
+          <dt>核心论点</dt>
+          <dd>阿迪克斯的"绅士"身份不是社交风度，而是道德选择——他本可以用天赋去压迫，却选择克制。杰姆总结："阿迪克斯是个绅士，跟我一样。"</dd>
+          <dt>主题作用</dt>
+          <dd>疯狗事件是阿迪克斯形象的"加冕"，但加冕的方式是克制而非夸耀——这与他作为律师的克制一脉相承。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c11">
+        <h3><span class="ch-num">Chapter 11</span>杜博斯太太的山茶花与"真正的勇敢"</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>杰姆十二岁生日后，因杜博斯太太骂阿迪克斯"替黑鬼和人渣打官司"，怒毁她的山茶花。阿迪克斯命杰姆去道歉，并每天下午为她朗读《艾凡赫》一个月，后延长到彻底戒除吗啡。杜博斯太太死前，阿迪克斯向杰姆揭示：她靠吗啡止痛多年，死前决定"干干净净地离开世界，不亏欠任何人，也不依赖任何东西"，并完成了戒断。她留下一枝茶梅给杰姆。阿迪克斯说："我想让你见识一下什么是真正的勇敢……勇敢就是，在你还没开始的时候就知道自己注定会输，但依然义无反顾地去做，并且不管发生什么都坚持到底。"</dd>
+          <dt>核心论点</dt>
+          <dd>"真正的勇敢"——不是手里有枪，而是明知必输仍坚持到底；杜博斯太太的九十八磅身躯赢了，因为她"死得无牵无挂，不亏欠任何人，也不依赖任何东西"。</dd>
+          <dt>主题作用</dt>
+          <dd>杜博斯太太的死是全书对"勇敢"的第一次完整定义；阿迪克斯借她向杰姆传授：道德勇气与体力无关，与胜负无关。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c12">
+        <h3><span class="ch-num">Chapter 12</span>首购教堂与卡波妮的双重语言</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>迪尔因新爸爸不喜欢他而留在默里迪恩。卡波妮带斯库特和杰姆去首购非裔循道宗教堂。卢拉质疑卡波妮为何带白人孩子来。塞克斯牧师带领会众为汤姆·鲁宾逊的妻子海伦募集十美元善款。斯库特发现卡波妮会两种语言：在家对杰姆说标准英语，在教堂对邻居说"黑人话"。卡波妮解释："一个人没必要把自己懂的东西都展现出来。"卡波妮透露：她是芬奇家用布莱克斯通的《英国法释义》教泽布识字的。</dd>
+          <dt>核心论点</dt>
+          <dd>语言即权力——卡波妮的"双重生活"是她作为黑人女性在两个世界之间的生存策略；"一个人没必要把自己懂的东西都展现出来"是全书对"装腔作势"的早期批评。</dd>
+          <dt>主题作用</dt>
+          <dd>孩子们的视野从芬奇家扩展到黑人社区；卡波妮的人物深度首次完整呈现，她不是"保姆"，而是有自己文化和语言策略的家庭成员。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c13">
+        <h3><span class="ch-num">Chapter 13</span>亚历山德拉姑姑入住与芬奇家族荣誉</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>亚历山德拉姑姑从芬奇庄园来住一阵子，理由是"让斯库特受到女性影响"。她向阿迪克斯强调芬奇家族"几代高贵血统"，阿迪克斯被迫向杰姆和斯库特转述——但说"那就忘了吧"。姑姑用"约书亚·S.圣克莱尔"等家族历史压人，杰姆反驳：姑姑的家族荣耀理论不过是"我们家没什么财富可言，只有家族背景值得炫耀"。姑姑试图阻止斯库特去卡波妮家，阿迪克斯罕见发火："我们不能让卡波妮离开这个家，除非她自己想走。"</dd>
+          <dt>核心论点</dt>
+          <dd>亚历山德拉的"家族荣誉"与阿迪克斯的"个体良心"形成对照——这是全书"传统 vs 现代"的核心张力。</dd>
+          <dt>主题作用</dt>
+          <dd>亚历山德拉作为"南方淑女教育"的代表正式登场；阿迪克斯的克制回应为全书定下"温和抵抗"的基调。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c14">
+        <h3><span class="ch-num">Chapter 14</span>迪尔再次出逃与汤姆案的家庭震动</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>迪尔从继父家逃出，藏在芬奇家床底。杰姆向阿迪克斯告发。迪尔与斯库特夜谈，揭示他离家出走的真正原因：继父一家"不想让我和他们待在一起"，他的存在是多余的。杰姆向阿迪克斯坦白：他最近"在心里装着好多事情"——汤姆·鲁宾逊的案子让他害怕。阿迪克斯说："法庭跟传道茶会一样，都是梅科姆县生活的一部分。"姑姑与阿迪克斯因"卡波妮去留"再次争执。</dd>
+          <dt>核心论点</dt>
+          <dd>杰姆的"害怕"是全书成长的真正开始——他不再是孩子，他必须面对成人世界的不可预测。</dd>
+          <dt>主题作用</dt>
+          <dd>迪尔作为"局外人"再次出场，他的"被忽视"预演了斯库特后来在法庭上的"被忽视"；杰姆对案件的恐惧为第二部的崩溃埋下伏笔。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c15">
+        <h3><span class="ch-num">Chapter 15</span>监狱前的暴徒与斯库特的救赎</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>汤姆·鲁宾逊被转移到县监狱。一天晚上，杰姆和斯库特夜探阿迪克斯的办公室——他不在。他们跟到监狱，发现一群男人围住阿迪克斯，要求他离开。阿迪克斯拒绝。斯库特冲进光圈，认出其中一人是沃尔特·坎宁安的父亲。她大声说："坎宁安先生，您的限定继承权办得怎么样了？""他跟我在同一个年级……是个好孩子。"坎宁安先生蹲下身："我会向他转达你的问候，小淑女。"暴徒散去。安德伍德先生举双筒猎枪在楼上窗户守护。</dd>
+          <dt>核心论点</dt>
+          <dd>斯库特用"谈论对方感兴趣的事"化解了暴徒——这是阿迪克斯"同理心"原则的实战应用；坎宁安作为"好人"的复杂性（既可能参与暴行，也可能因一句问候而退缩）预示第二部陪审团中的"不确定性"。</dd>
+          <dt>主题作用</dt>
+          <dd>全书第一次正面冲突（白人 vs 黑人/律师）以非暴力的方式解决；斯库特的"天真"成为武器，但这一胜利是脆弱的。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c16">
+        <h3><span class="ch-num">Chapter 16</span>法庭的众生相与坎宁安的双重表亲</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>全家人去法庭旁听。黑人们给斯库特、杰姆和迪尔让出座位。阿迪克斯选陪审团时，杰姆注意到陪审团里有一个坎宁安家的人。阿迪克斯后来透露：他把那个"双重表亲"（两姐妹分别嫁给两兄弟的坎宁安分支）留在陪审团，是出于一种直觉——监狱前夜他们对芬奇家的敬意可能转化为陪审团的"不确定性"。阿迪克斯说："如果有两个这样的人，陪审团就会陷入僵局。"杰姆震惊：把想害你的人放进陪审团？阿迪克斯："一个想给被告定罪的人和一个内心有些不安的人，他们之间就有了微妙的差别。"</dd>
+          <dt>核心论点</dt>
+          <dd>"好人"的复杂性——坎宁安既是暴徒的参与者，也是陪审团中的潜在摇摆者；阿迪克斯的策略是把"不确定性"留在场上。</dd>
+          <dt>主题作用</dt>
+          <dd>陪审团的"拖延"是全书法律胜利的微弱信号；阿迪克斯的政治智慧被揭示，他是策略家，不只是理想主义者。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c17">
+        <h3><span class="ch-num">Chapter 17</span>控方证人：泰特与尤厄尔父女的破绽</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>警长泰特作证：马耶拉·尤厄尔躺在客厅中间，他说是汤姆强奸了她。阿迪克斯交叉讯问：马耶拉的右眼乌青，说明打人者可能是左撇子——而尤厄尔先生在信封上签名时是左手。鲍勃·尤厄尔出庭作证，泰勒法官命他"注意自己的语言"。阿迪克斯问尤厄尔是否会读书写字，让他签名——揭示他是左撇子。尤厄尔家的居住环境被详细描述：垃圾场后的木屋、七个孩子、一个被父亲虐待的女儿。</dd>
+          <dt>核心论点</dt>
+          <dd>阿迪克斯的交叉讯问不是为了赢，而是为了"让陪审团看到真相"；即使陪审团不听，他也必须把证据摆出来。</dd>
+          <dt>主题作用</dt>
+          <dd>法庭的逻辑（证据、交叉讯问）第一次完整呈现；马耶拉作为"被父亲虐待的白人女性"的复杂性被首次揭示。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c18">
+        <h3><span class="ch-num">Chapter 18</span>马耶拉出庭：被压抑的真相</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>马耶拉·维奥莉特·尤厄尔出庭。她19岁半，七个孩子的长女，母亲早逝。她承认父亲没碰过她，但承认"他喝酒的时候"除外。她指控汤姆强奸了她，但当阿迪克斯问她"记得他打过你的脸吗"，她开始崩溃："不记得，我想不起来他有没有打过我。"阿迪克斯揭示：汤姆有理由害怕（一个黑人靠近白人妇女是死罪），但他试图跑掉——这恰恰是"清白"的证据。马耶拉最终爆发："坐在那边的那个黑鬼占有了我……如果你们这些高贵的绅士只会花言巧语，不管不问，那你们就是一群臭胆小鬼。"</dd>
+          <dt>核心论点</dt>
+          <dd>马耶拉既是"施害者"（诬告），也是"受害者"（父亲的家暴、孤独、贫困）——她的崩溃是全书对"白人女性神话"的彻底解构。</dd>
+          <dt>主题作用</dt>
+          <dd>法庭的"性别+种族"双重枷锁被揭示：白人女性被赋予"脆弱"的神话，但马耶拉的脆弱来自父亲的暴力而非黑人的暴力。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c19">
+        <h3><span class="ch-num">Chapter 19</span>汤姆·鲁宾逊出庭：不可能的罪行</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>汤姆·鲁宾逊出庭，左手残疾（被多尔夫斯·雷蒙德家的轧棉机绞伤），右手有力和。他作证：事发当天他下工回家，经过尤厄尔家；马耶拉喊他进院，说要他帮忙；她关门，他从椅子上跳下来；她从背后扑过来，抱住他的腿，亲吻他的脸颊，说"你也亲我一下啊，黑鬼"；他试图挣脱；鲍勃·尤厄尔从窗口喊："你这该死的臭婊子，我要杀了你。"他跑了。吉尔莫先生交叉讯问：汤姆每次回答都称马耶拉"记错了"，激怒陪审团。林克·迪斯先生站起来为汤姆说话，被泰勒法官驱逐。</dd>
+          <dt>核心论点</dt>
+          <dd>汤姆的"害怕"是双重恐惧——既怕尤厄尔（白人男性），也怕"被传上法庭"（黑人男性的制度性恐惧）；他的"清白"恰恰是让他被定罪的原因（他试图逃跑）。</dd>
+          <dt>主题作用</dt>
+          <dd>全书的道德核心被推至顶点：一个"本分正派"的黑人，仅仅因为"同情"一个白人女子，就被制度性地判死刑。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c20">
+        <h3><span class="ch-num">Chapter 20</span>多尔夫斯·雷蒙德与阿迪克斯的结案陈词</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>迪尔因吉尔莫先生对汤姆的恶劣态度而哭泣，多尔夫斯·雷蒙德先生从树后现身，给他和斯库特喝"可口可乐"——他声称自己从纸袋里喝的是"威士忌"，实际是可口可乐。雷蒙德向孩子们解释：他故意装成"威士忌的俘虏"，是为了给镇上一个"理由"——如果他公开与黑女人生活并混血，镇民会受不了；装醉让他们可以"把他归结为一个理由"。阿迪克斯结案陈词：他脱下外套、解开领带、解开马甲纽扣，像邻居聊天一样对陪审团说话。他说："在这个国家里，从某种意义上来说，一切人是生来平等的——有一种人类社会机构，可以让乞丐和洛克菲勒家族平起平坐，让愚人和爱因斯坦不分尊卑——这种机构，就是法庭。"他引用杰斐逊"人人生而平等"，但指出"某些人灌输给我们的'人人生而平等'，实际上是个谬论"——法庭是"平等主义者"，但陪审团不是。</dd>
+          <dt>核心论点</dt>
+          <dd>雷蒙德是"装疯卖傻"以博取社会"理解"的智者——他的伪装是对社会偏见的策略性回应；阿迪克斯的陈词是全书的"独立宣言"，但他知道陪审团不会听。</dd>
+          <dt>主题作用</dt>
+          <dd>两种"策略性伪装"（雷蒙德装醉、阿迪克斯脱外套）共同构成对"体面"的批判；阿迪克斯的陈词是全书的"独立宣言"，但陪审团的不在场让宣言失效。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c21">
+        <h3><span class="ch-num">Chapter 21</span>有罪判决与黑人的起立致敬</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>陪审团离开三个小时后回来，裁定汤姆有罪。黑人看台全体起立，塞克斯牧师对斯库特说："琼·露易丝小姐，站起来。你父亲就要走过来了。"全镇为阿迪克斯送食物：腌猪肉、西红柿、葡萄、泡猪蹄。莫迪小姐对杰姆说："阿迪克斯·芬奇不会赢，也不可能赢，可是，他是这里唯一能让陪审团在一个这样的案子上拖延那么久的人。我们算是迈出了一步——虽然只是小小的一步，可毕竟是迈出了一步。"鲍勃·尤厄尔在邮局拐角啐阿迪克斯一脸，扬言"搭上下半辈子也不会放过他"。</dd>
+          <dt>核心论点</dt>
+          <dd>"有罪"是必然的，但陪审团的"拖延"是进步——它证明至少有一个陪审员在挣扎；黑人的起立致敬是全书最有力的"无声控诉"。</dd>
+          <dt>主题作用</dt>
+          <dd>法律程序的"完成"与实质正义的"失败"形成尖锐对比；莫迪小姐的"小小一步"是全书对希望的重新定义。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c22">
+        <h3><span class="ch-num">Chapter 22</span>上诉的可能与尤厄尔的威胁</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>阿迪克斯告诉杰姆：还可以上诉，州高等法院可能翻案。杰姆问："就算他犯了罪，可并没有杀人啊。他没有夺去任何人的性命。"阿迪克斯解释：在亚拉巴马州，强奸是死罪；陪审团"要么宣告无罪释放，要么就是死刑"——没有中间地带。阿迪克斯说："在我的法庭上，当对立双方是一个白人和一个黑人的时候，白人总是胜诉。这些事情很丑恶，可现实生活就是如此。"尤厄尔威胁升级，杰姆害怕。阿迪克斯说："我们不用害怕鲍勃·尤厄尔，那天早上他已经发泄完了。"但亚历山德拉姑姑说："他那种人，为了解气，什么都干得出来。"</dd>
+          <dt>核心论点</dt>
+          <dd>"现实很丑恶"——阿迪克斯不向孩子许诺希望，只承诺"尽力"；这是全书对"诚实"原则的坚持。</dd>
+          <dt>主题作用</dt>
+          <dd>尤厄尔的威胁从"啐脸"升级为"可能的暗杀"，为第二部高潮（万圣节夜袭）埋下伏笔；阿迪克斯的"不害怕"与孩子"害怕"的对照让成人世界显得既勇敢又盲目。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c23">
+        <h3><span class="ch-num">Chapter 23</span>四种人与杰姆的"理解怪人"论</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>尤厄尔再次啐阿迪克斯。阿迪克斯解释：他宁愿尤厄尔的怨恨发泄在自己身上，也不愿尤厄尔"找马耶拉·尤厄尔算账"。杰姆开始理解怪人拉德利："我理解怪人拉德利为什么老是闭门不出了……那是因为他'想'把自己关在屋子里。"杰姆提出"梅科姆县有四种人"：芬奇家这样的普通人、坎宁安家这样的山里人、尤厄尔家这样的垃圾场居民、黑人。亚历山德拉姑姑称沃尔特·坎宁安是"渣滓"，杰姆爆发："他和尤厄尔家的人不一样！"</dd>
+          <dt>核心论点</dt>
+          <dd>"理解怪人"——杰姆第一次用心理分析解释拉德利，标志他从儿童游戏转向成人同理心；"四种人"理论是杰姆对梅科姆阶级结构的早期批判。</dd>
+          <dt>主题作用</dt>
+          <dd>杰姆的成长弧在此达到第一个拐点：他不再相信"非黑即白"；姑姑的"渣滓"标签与杰姆的反驳预示第二部他对陪审团制度的彻底失望。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c24">
+        <h3><span class="ch-num">Chapter 24</span>传道会茶点与汤姆·鲁宾逊之死</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>亚历山德拉姑姑的传道会。女士们讨论"摩那人"的"堕落"，梅里威瑟太太把汤姆的妻子海伦的不满是"厨娘们"的"抱怨"。莫迪小姐冷冷反击。阿迪克斯走进来，脸色煞白："汤姆死了。是被人开枪打死的。他想逃跑。那是在放风时间。看守的警卫命令他停下来，他们先往天上开了几枪，然后才朝他射击。在他就要翻过栅栏的时候，子弹打中了他。据说他身上有十七处弹孔。"卡波妮陪同阿迪克斯去告诉海伦。安德伍德在《梅科姆论坛》发表社论，把汤姆的死比作"猎人和无知孩童愚蠢地杀戮鸣禽"。</dd>
+          <dt>核心论点</dt>
+          <dd>汤姆的"越狱"不是怯懦，而是"阿迪克斯已经不能再帮他了"——他在入狱那天就放弃了希望；安德伍德的社论把"杀死知更鸟"的隐喻具体化。</dd>
+          <dt>主题作用</dt>
+          <dd>全书的"知更鸟"被杀死——这是书名最直接的兑现；莫迪小姐对亚历山德拉的反击显示，小镇并非铁板一块，仍有少数人保持清醒。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c25">
+        <h3><span class="ch-num">Chapter 25</span>海伦·鲁宾逊的晕倒与安德伍德的社论</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>阿迪克斯带杰姆和斯库特去汤姆家。海伦听到消息后"一下子倒在了地上"。镇民对汤姆之死的版本是"典型的黑鬼逃窜事件"。安德伍德的社论写道："杀死残疾人是一桩罪恶，不管他们当时是站着、坐着，还是在逃跑。"斯库特逐渐明白：阿迪克斯"拿出一个自由人所能采取的一切手段来拯救汤姆·鲁宾逊，但在人们内心深处的秘密法庭里，根本就没有什么诉讼可言。从马耶拉·尤厄尔开口叫嚷的那一刻起，汤姆就是死路一条。"</dd>
+          <dt>核心论点</dt>
+          <dd>"秘密法庭"——人们内心的偏见比任何正式法庭都更强大；安德伍德的社论是全书对"法律失败"的最强控诉。</dd>
+          <dt>主题作用</dt>
+          <dd>海伦的晕倒是汤姆之死的"身体记忆"；斯库特开始理解"法律"与"正义"的鸿沟。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c26">
+        <h3><span class="ch-num">Chapter 26</span>塞西尔的时事报告与斯库特的"矛盾"</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>学校时事讲评课。塞西尔讲希特勒迫害犹太人，盖茨小姐借此教育孩子们"我们是民主国家"。斯库特举手引用阿迪克斯的竞选口号："人人平等，没有特权。"盖茨小姐非常激动。但斯库特发现：盖茨小姐在法庭台阶上对斯蒂芬妮小姐说"是该给他们点儿教训了，那些黑鬼越来越不知道天高地厚"。杰姆对斯库特说："我再也不想听到关于法庭上的事儿，永远，永远也不想听。"斯库特问阿迪克斯，他无法回答为什么盖茨小姐一边痛恨希特勒一边家乡的人这么恶毒。</dd>
+          <dt>核心论点</dt>
+          <dd>"民主 vs 偏见"——盖茨小姐的"民主"教育只针对外国，不针对家乡；这是全书对"伪善"的最锋利批评。</dd>
+          <dt>主题作用</dt>
+          <dd>杰姆的"封闭"是成长创伤的直接后果；斯库特的"矛盾"问题预示她将成为更深刻的观察者。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c27">
+        <h3><span class="ch-num">Chapter 27</span>尤厄尔失业与林克·迪斯的庇护</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>鲍勃·尤厄尔因"懒惰"被公共事业振兴署辞退——他是唯一一个因此被辞退的人。林克·迪斯为海伦安排工作，并警告尤厄尔："要是再让我听见我家海伦嘀咕一声，说她不敢走这条路，等不到天黑，我就把你送进监狱里去。"尤厄尔尾随海伦，被林克·迪斯驱逐。泰勒法官家深夜被闯入（纱门被割开）。尤厄尔与海伦的骚扰成为常态。阿迪克斯说："也许是因为他心里明白，在梅科姆，其实没几个人相信他和马耶拉编造的谎言。"梅科姆恢复了老样子。</dd>
+          <dt>核心论点</dt>
+          <dd>尤厄尔的"失业"是对他社会价值的最终确认——他已无任何可失去；阿迪克斯的"理解"是对尤厄尔的最后一次"同理心"尝试。</dd>
+          <dt>主题作用</dt>
+          <dd>尤厄尔从"失败的父亲"升级为"潜在的杀手"；林克·迪斯的庇护显示，仍有白人愿意为正义冒险。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c28">
+        <h3><span class="ch-num">Chapter 28</span>斯库特演火腿与杰姆的预言</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>万圣节，斯库特扮演"火腿"上台，穿铁丝网做的演出服。阿迪克斯太累不去看演出。亚历山德拉姑姑也"打了个寒战"，提前上床。杰姆主动提出陪斯库特去学校。路上，他们听见身后有脚步声——杰姆以为是塞西尔在搞鬼。斯库特唱"塞西尔是只大肥母鸡"，杰姆喊"嗨——咿"。脚步声继续，不是塞西尔。斯库特问杰姆能不能脱下演出服，杰姆说算了。他们继续走，脚步声越来越近。突然有人扑过来，撞击演出服。斯库特摔倒。杰姆冲过去救她，被尤厄尔拽倒，手臂骨折。一个男人（尤厄尔）从背后勒住斯库特。突然有人把尤厄尔拽倒。斯库特听见喘息和咳嗽。一个男人抱着杰姆（受伤的）走向阿迪克斯。</dd>
+          <dt>核心论点</dt>
+          <dd>演出服的"铁丝网"救了斯库特的命；杰姆的"预言"（"阿迪克斯是个绅士，跟我一样"）在暴力中得到验证。</dd>
+          <dt>主题作用</dt>
+          <dd>全书高潮的开端：暴力突然降临，孩子们的童年正式终结；杰姆的骨折是全书开篇悬念的兑现。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c29">
+        <h3><span class="ch-num">Chapter 29</span>怪人拉德利的现身与"你好，怪人"</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>杰姆的房间。阿迪克斯和泰特警长在场。泰特说："鲍勃·尤厄尔躺在那边的大树底下，肋下插着一把厨刀。他死了，芬奇先生。"角落里站着一个男人——怪人拉德利。斯库特说："你好，怪人。"阿迪克斯纠正："宝贝儿，应该叫阿瑟先生。"怪人苍白、瘦削、羞怯，他的手紧贴在墙上，留下两道汗渍。他轻轻握了握斯库特的手。雷诺兹医生说杰姆"离死可远得很"——只是骨折。</dd>
+          <dt>核心论点</dt>
+          <dd>怪人从"幽灵"变成"人"——斯库特的"你好，怪人"是全书对偏见的最终克服：她不再害怕，而是问候。</dd>
+          <dt>主题作用</dt>
+          <dd>怪人的"现身"是全书的终极救赎；阿迪克斯的纠正"应该叫阿瑟先生"是全书对"名字/身份"的尊重。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c30">
+        <h3><span class="ch-num">Chapter 30</span>泰特警长与阿迪克斯的"让死者埋葬死者"</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>阿迪克斯与泰特警长在前廊对峙。阿迪克斯坚持"把事情摆在明面上"，让全县人知道杰姆杀了尤厄尔；泰特说："鲍勃·尤厄尔是倒毙在自己的刀口上。他自己害死了自己。"泰特演示：尤厄尔绊倒后，自己的重量把厨刀刺入软肋。阿迪克斯无法接受——他认为掩盖真相违背了他教育杰姆的原则。泰特说："一个公民竭尽全力阻止犯罪的发生，是违反法律的行为吗？——这正是他所做的。""如果人们无视他的隐居习惯，硬要把他拉到聚光灯下——我认为，这就是犯罪。""让死者埋葬死者吧，芬奇先生。"斯库特突然明白："这就像是杀死一只知更鸟，对不对？"阿迪克斯把脸埋在她的头发里。</dd>
+          <dt>核心论点</dt>
+          <dd>泰特的"隐瞒"是对阿迪克斯"诚实"原则的温柔修正——保护怪人比公开真相更重要；斯库特的"杀死一只知更鸟"是全书主题的最终点题。</dd>
+          <dt>主题作用</dt>
+          <dd>阿迪克斯的"诚实"原则在怪人的安全面前退让——这是全书对"原则 vs 结果"的最后一次辩证；斯库特的"杀死一只知更鸟"把书名、法庭、怪人三者统一。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c31">
+        <h3><span class="ch-num">Chapter 31</span>斯库特送阿瑟回家：站在他的角度</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>斯库特领怪人拉德利到杰姆床边。怪人轻轻触摸杰姆的头发。亚历山德拉姑姑去客厅。斯库特带怪人回家，挽着他的胳膊。他们穿过街角，路灯下，斯库特想起迪尔曾站在这里守望。她第二次踏进拉德利家的院门。在前廊上，斯库特想起阿迪克斯的话："你永远也不可能真正了解一个人，除非你穿上他的鞋子走来走去，站在他的角度考虑问题。""对我来说，站在拉德利家的前廊上就足够了。"她想象夏天：阿迪克斯下班回家，两个孩子跑上前去。秋天：孩子们在杜博斯太太家门前打架。冬天：房子着火，阿迪克斯开枪射疯狗。又一个夏天：杰姆需要怪人挺身相助。斯库特走在回家的路上，想起阿迪克斯读《灰色幽灵》给她听——"大多数人都是善良的，等你最终了解他们之后就会发现。"她进入梦乡。</dd>
+          <dt>核心论点</dt>
+          <dd>"站在拉德利家的前廊上"是全书对"同理心"的最终定义——不是抽象的说教，而是身体的、空间的、想象的经验。</dd>
+          <dt>主题作用</dt>
+          <dd>全书收尾：斯库特完成成长仪式；阿迪克斯的《灰色幽灵》成为"善良"的睡前祷词；"大多数人都是善良的"是全书留给读者的最后温度。</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">VI</span>金句摘录</h2>
+      <ol class="quotes">
+        <li>
+          你永远也不可能真正了解一个人，除非你钻进他的皮肤里，像他一样走来走去找。
+          <span class="src">Chapter 01 · 阿迪克斯的同理心原则</span>
+        </li>
+        <li>
+          杀死一只知更鸟便是犯罪。
+          <span class="src">Chapter 10 · 阿迪克斯对斯库特解释</span>
+        </li>
+        <li>
+          知更鸟只是哼唱美妙的音乐供人们欣赏，什么坏事也不做。它们不吃人家院子里种的花果蔬菜，也不在谷仓里筑巢做窝，只是为我们尽情地唱歌。
+          <span class="src">Chapter 10 · 莫迪小姐的解释</span>
+        </li>
+        <li>
+          勇敢就是，在你还没开始的时候就知道自己注定会输，但依然义无反顾地去做，并且不管发生什么都坚持到底。一个人很少能赢，但也总会有赢的时候。
+          <span class="src">Chapter 11 · 阿迪克斯转述杜博斯太太的"真正的勇敢"</span>
+        </li>
+        <li>
+          如果我不去做，我在教堂里就没办法礼拜上帝了。
+          <span class="src">Chapter 09 · 阿迪克斯接下汤姆·鲁宾逊案的动机</span>
+        </li>
+        <li>
+          在我们这个镇上，还是有那么几个人，主张平等原则不仅仅适用于白人；还是有那么几个人，认为公平审判应该适用于每一个人，而不只是我们自己；还是有那么几个人心怀谦卑，在看到黑人的时候，会想到没有上帝的慈悲就没有他们自己。
+          <span class="src">Chapter 22 · 莫迪小姐对杰姆的解释</span>
+        </li>
+        <li>
+          法庭不会比坐在我面前的任何一位陪审团成员更公正。法庭只能和它的陪审团一样完善，而陪审团只能和它的每一位成员一样完善。
+          <span class="src">Chapter 20 · 阿迪克斯结案陈词</span>
+        </li>
+        <li>
+          让死者埋葬死者吧。
+          <span class="src">Chapter 30 · 泰特警长保护怪人</span>
+        </li>
+        <li>
+          这就像是杀死一只知更鸟，对不对？
+          <span class="src">Chapter 30 · 斯库特点题</span>
+        </li>
+        <li>
+          大多数人都是善良的，等你最终了解他们之后就会发现。
+          <span class="src">Chapter 31 · 阿迪克斯读《灰色幽灵》</span>
+        </li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VII</span>批判性思考与延伸</h2>
+      <h3>优点与局限</h3>
+      <ul class="points">
+        <li><strong>优点：</strong>李以儿童视角讲述一个关于种族、阶级、性别暴力的沉重主题，避免了说教；阿迪克斯·芬奇成为美国文学中最持久的道德偶像之一；"杀死一只知更鸟"的隐喻简洁而普世，跨越文化与语言。</li>
+        <li><strong>局限：</strong>小说对黑人角色的塑造相对单薄——汤姆·鲁宾逊几乎是"圣徒"的符号，海伦、卡波妮等黑人女性缺乏独立声音。第二部《守望者》（2015）的出版揭示了一个"阿迪克斯支持隔离"的李，引发学界对"阿迪克斯神话"的反思：他究竟是英雄，还是时代局限下的温和改革者？</li>
+        <li><strong>历史背景：</strong>小说设定在 1933–1935 年的亚拉巴马州，吉姆·克劳法下的南方。1931 年，Scottsboro Boys 案（九名黑人少年被诬告强奸两名白人女子）成为小说的直接灵感。1960 年出版时，美国民权运动正在兴起，小说成为"法律面前人人平等"的通俗教材。</li>
+      </ul>
+
+      <h3>适合 / 不适合的读者</h3>
+      <ul class="points">
+        <li><strong>适合：</strong>青少年读者（成长小说的典范）；对美国南方文学、种族议题、法律伦理感兴趣的读者；任何想理解"同理心"作为一种实践哲学的读者。</li>
+        <li><strong>不适合：</strong>寻找紧凑悬疑的读者（小说节奏缓慢，前 11 章大量铺垫）；对儿童视角叙事不耐的读者；期待"阿迪克斯完美无缺"的读者（第二部《守望者》会颠覆这一印象）。</li>
+      </ul>
+
+      <h3>互为补充 / 对照的书</h3>
+      <ul class="points">
+        <li><strong>《To Kill a Mockingbird》续作《Go Set a Watchman》（守望者，2015）</strong>——同一作者的初稿，揭示阿迪克斯的复杂性。</li>
+        <li><strong>《梅冈城故事》的原型——美国最高法院 1954 年 Brown v. Board of Education 判决</strong>——推翻"隔离但平等"的宪法基础。</li>
+        <li><strong>《杀死一只知更鸟》电影版（1962，导演 Robert Mulligan）</strong>——格里高利·派克获奥斯卡最佳男主角，电影与小说互为表里。</li>
+        <li><strong>《梅科姆的检察官》（The Help, Kathryn Stockett, 2009）</strong>——同样以种族议题为背景，但采用多声部叙事。</li>
+        <li><strong>《杀死一只知更鸟》与《局外人》（L'Étranger, Albert Camus, 1942）</strong>——对照阅读：一个关于"法律与偏见"，一个关于"法律与荒诞"。</li>
+      </ul>
+
+      <div class="note">
+        <strong>版本说明：</strong>本笔记基于译林出版社 2017 年 2 月版（ISBN 9787544766500），正文约 18.4 万字（汉字数）。原书为 31 章，分"第一部"（1–11 章）与"第二部"（12–31 章）。EPUB 提取共 35 个单元，其中正文单元 31 个（EPUB 4–14 + 16–35），对应原书 31 章。脚注为 0 字。所有章节分析基于实际阅读，未依赖摘要或外部资料。
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">杀死一只知更鸟</div>
+  <div>To Kill a Mockingbird · Harper Lee · 读书笔记 · 生成于 2026</div>
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

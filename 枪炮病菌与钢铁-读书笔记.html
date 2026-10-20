@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>枪炮、病菌与钢铁 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #3d5a80;
+    --accent-soft: #e8eef4;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(180,210,240,.25), transparent 60%), linear-gradient(180deg, #1a2a3a 0%, #3d5a80 100%);
+    --hero-text: #f0f4f8;
+    --hero-subtitle: rgba(240,244,248,.72);
+    --hero-meta: rgba(240,244,248,.78);
+    --hero-accent: #98c1d9;
+    --hero-divider: rgba(240,244,248,.18);
+    --progress-gradient: linear-gradient(90deg, #3d5a80, #98c1d9);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(152,193,217,.08), transparent 40%), radial-gradient(circle at 80% 70%, rgba(61,90,128,.06), transparent 40%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans); font-size: 12px; letter-spacing: .4em;
+    color: var(--hero-accent); text-transform: uppercase;
+    margin-bottom: 20px; position: relative;
+  }
+  .hero h1 {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em; margin: 0 0 20px;
+    line-height: 1.2; color: var(--hero-text); position: relative;
+  }
+  .hero .subtitle {
+    font-family: var(--serif); font-style: italic;
+    font-size: 17px; color: var(--hero-subtitle);
+    letter-spacing: .1em; margin-bottom: 36px; position: relative;
+  }
+  .hero .meta {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px 22px; font-family: var(--sans); font-size: 13px;
+    color: var(--hero-meta); padding-top: 20px;
+    border-top: 1px solid var(--hero-divider); position: relative;
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1440px; margin: 0 auto;
+    padding: 48px 32px 96px;
+    display: grid; grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px; align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky; top: 24px; align-self: start;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+    padding-right: 16px; border-right: 1px solid var(--border); font-family: var(--sans);
+    font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px; letter-spacing: .3em; color: var(--text-muted);
+    text-transform: uppercase; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block; padding: 6px 0 6px 22px;
+    color: var(--text-soft); text-decoration: none;
+    position: relative; line-height: 1.5; transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc; position: absolute;
+    left: 0; color: var(--text-muted); font-size: 11px;
+    font-weight: 500; letter-spacing: .05em; top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif); font-size: 26px; font-weight: 700;
+    color: var(--text); margin: 0 0 28px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em; position: relative;
+  }
+  h2::after {
+    content: ""; position: absolute; left: 0; bottom: -2px;
+    width: 60px; height: 2px; background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block; font-family: var(--sans);
+    font-size: 13px; color: var(--accent); letter-spacing: .2em;
+    margin-right: 14px; font-weight: 500; vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif); font-size: 19px; font-weight: 600;
+    color: var(--text); margin: 36px 0 14px; padding-left: 14px;
+    border-left: 3px solid var(--gold); line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans); font-size: 11px; color: var(--accent);
+    letter-spacing: .2em; display: block; margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead { font-size: 18.5px; color: var(--text); line-height: 1.9; }
+
+  blockquote {
+    margin: 24px 0; padding: 20px 24px 20px 28px;
+    background: var(--quote-bg); border-left: 3px solid var(--accent);
+    color: var(--text-soft); font-style: italic;
+    border-radius: 0 4px 4px 0; position: relative;
+  }
+  blockquote::before {
+    content: "\201C"; position: absolute; top: 2px; left: 8px;
+    font-family: Georgia, serif; font-size: 48px; line-height: 1;
+    color: var(--accent-soft); pointer-events: none;
+  }
+  blockquote p { margin: 0 0 10px; position: relative; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote .src {
+    display: block; font-style: normal; font-family: var(--sans);
+    font-size: 12px; color: var(--text-muted); margin-top: 10px;
+    letter-spacing: .05em;
+  }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 20px 0;
+    font-family: var(--sans); font-size: 14.5px; background: var(--surface);
+    box-shadow: var(--shadow); border-radius: 6px; overflow: hidden;
+  }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: #f5f0e3; color: var(--text); font-weight: 600; font-size: 13px; letter-spacing: .1em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fbf8ef; }
+  td:first-child { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+
+  .chapter {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px 28px; margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06); }
+  .chapter h3 {
+    margin: 0 0 16px; padding: 0 0 12px;
+    border-left: none; border-bottom: 1px dashed var(--border); padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans); font-size: 11.5px; letter-spacing: .2em;
+    color: var(--accent); text-transform: uppercase; margin-top: 14px; margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px; position: relative; line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6"; position: absolute; left: 4px; top: 10px;
+    color: var(--gold); font-size: 10px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px; }
+  .tag {
+    display: inline-block; padding: 4px 12px;
+    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--sans); font-size: 12px; border-radius: 999px;
+    letter-spacing: .05em;
+  }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote; padding: 22px 24px 22px 64px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; margin-bottom: 14px; position: relative;
+    font-family: var(--serif); font-size: 16.5px; line-height: 1.9; color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute; left: 20px; top: 22px;
+    font-family: var(--serif); font-style: italic; font-size: 28px;
+    color: var(--accent); font-weight: 600;
+  }
+  .quotes .src {
+    display: block; font-family: var(--sans); font-size: 12px;
+    color: var(--text-muted); margin-top: 8px; letter-spacing: .05em;
+  }
+
+  .note {
+    font-family: var(--sans); font-size: 13px; color: var(--text-muted);
+    padding: 14px 18px; background: #f5f1e5; border-radius: 4px;
+    margin: 16px 0; line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 48px 0; }
+
+  footer {
+    text-align: center; padding: 40px 24px 60px; color: var(--text-muted);
+    font-family: var(--sans); font-size: 12.5px; letter-spacing: .1em;
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif); font-size: 22px; color: var(--accent);
+    letter-spacing: .3em; margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed; bottom: 28px; right: 28px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--accent); color: #fff; border: none;
+    cursor: pointer; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity .2s, transform .2s; z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif); font-size: 3.4em; float: left;
+    line-height: .9; padding: 6px 10px 0 0;
+    color: var(--accent); font-weight: 700;
+  }
+
+  .cast-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 32px 32px 24px; box-shadow: var(--shadow); margin: 24px 0;
+  }
+  .cast-legend {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    font-family: var(--sans); font-size: 12.5px; color: var(--text-soft);
+    padding: 14px 18px; background: #f7f3ea; border-radius: 6px; margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block; width: 12px; height: 12px;
+    border-radius: 3px; vertical-align: middle; margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px; letter-spacing: .3em; color: var(--text-muted);
+    text-transform: uppercase; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 1px dashed var(--border);
+  }
+  .cast-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .cast-node {
+    flex: 0 0 auto; min-width: 140px; padding: 10px 14px;
+    background: #faf6ec; border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name { font-family: var(--serif); font-weight: 600; font-size: 15px; color: var(--text); line-height: 1.3; }
+  .cast-name .aka { font-weight: 400; font-size: 12px; color: var(--text-muted); margin-left: 4px; }
+  .cast-role { font-family: var(--sans); font-size: 12px; color: var(--text-soft); margin-top: 4px; line-height: 1.5; }
+  .cast-note { font-family: var(--sans); font-size: 12px; color: var(--text-muted); margin-top: 4px; font-style: italic; }
+  .cast-connector { text-align: center; color: var(--text-muted); font-size: 16px; margin: -8px 0 8px; }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>枪炮、病菌与钢铁</h1>
+  <div class="subtitle">Guns, Germs, and Steel · 人类社会的命运</div>
+  <div class="meta">
+    <span><strong>类型</strong>非虚构 / 历史人类学 / 大历史</span>
+    <span><strong>作者</strong>贾雷德·戴蒙德</span>
+    <span><strong>译者</strong>王道还、廖月娟</span>
+    <span><strong>字数</strong>约 15.0 万字（正文）</span>
+    <span><strong>出版</strong>中信出版集团 2022</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">核心概念与术语</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与核心论点</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">第一章 人类社会的起跑线</a></li>
+          <li><a href="#c2">第二章 历史的自然实验</a></li>
+          <li><a href="#c3">第三章 卡哈马卡的冲突</a></li>
+          <li><a href="#c4">第四章 农民的力量</a></li>
+          <li><a href="#c5">第五章 历史上的有与无</a></li>
+          <li><a href="#c6">第六章 下田好，还是打猎好？</a></li>
+          <li><a href="#c7">第七章 杏仁的前世今生</a></li>
+          <li><a href="#c8">第八章 是苹果的问题，还是印第安人的问题？</a></li>
+          <li><a href="#c9">第九章 斑马、不幸福的婚姻与安娜·卡列尼娜原则</a></li>
+          <li><a href="#c10">第十章 大陆轴线——历史的伏笔</a></li>
+          <li><a href="#c11">第十一章 牲畜的致命礼物</a></li>
+          <li><a href="#c12">第十二章 蓝本和借来的字母</a></li>
+          <li><a href="#c13">第十三章 发明为需求之母</a></li>
+          <li><a href="#c14">第十四章 从人人平等到盗贼统治</a></li>
+          <li><a href="#c15">第十五章 亚力的族人</a></li>
+          <li><a href="#c16">第十六章 中国——东亚之光</a></li>
+          <li><a href="#c17">第十七章 开往波利尼西亚的快船</a></li>
+          <li><a href="#c18">第十八章 两个半球的碰撞</a></li>
+          <li><a href="#c19">第十九章 非洲是怎么变成黑人的非洲的？</a></li>
+          <li><a href="#c20">第二十章 日本人是什么人？</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">1972 年，在巴布亚新几内亚的沙滩上，政治人物亚力问了一个简单的问题："为什么是白人制造出这么多货物，再运来这里？为什么我们黑人没搞出过什么名堂？"这个问题直指现代世界财富与权力分配的核心——为什么是欧洲人征服了美洲、澳大利亚和非洲，而不是反过来？贾雷德·戴蒙德的答案出人意料：不是因为人种差异，而是因为地理环境的差异。</p>
+      <p>《枪炮、病菌与钢铁》是戴蒙德对其"终极问题"的回应。他追溯 1.3 万年来人类社会的演化，从更新世末期的狩猎—采集生活开始，分析食物生产（农业与畜牧业）在几个独立中心兴起后，如何引发人口密度、病菌、技术、文字和政治组织的连锁反应。最终，他提出四组最重要的环境差异：各大洲可供驯化的野生动植物资源不同；大陆轴线走向影响传播与迁徙速度；各大洲与外界沟通的难易程度不同；以及面积与人口总数的差异。这四组因素共同决定了为什么是欧亚大陆而非其他大洲跑在了历史的前面。</p>
+      <p>本书不是一部传统意义上的历史书，而是一部"长时段比较研究"的典范。它用地理学、考古学、语言学、遗传学等多学科证据，构建了一个宏大而精密的因果链：从安第斯山脉的骆马到波利尼西亚的莫里奥里人，从复活节岛的巨像到日本列岛的陶器，戴蒙德用一个个"自然实验"证明了环境对人类社会的深远影响。他明确反对"地理决定论"的误解——人类创造力始终重要，但环境提供了不同的"起步素材"和"利用新发明的情境"。</p>
+      <div class="tags">
+        <span class="tag">大历史</span>
+        <span class="tag">人类演化</span>
+        <span class="tag">农业起源</span>
+        <span class="tag">地理决定论</span>
+        <span class="tag">文明比较</span>
+        <span class="tag">普利策奖</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+      <h2><span class="num">II</span>核心概念与术语</h2>
+      <div class="cast-legend">
+        <span><span class="swatch" style="background:#2d5f8a"></span>地理/生态概念</span>
+        <span><span class="swatch" style="background:#a04e7a"></span>历史/社会概念</span>
+        <span><span class="swatch" style="background:#b08d4f"></span>方法/原则</span>
+      </div>
+      <div class="cast-tree">
+        <div class="cast-gen">
+          <div class="cast-gen-label">核心地理概念</div>
+          <div class="cast-row">
+            <div class="cast-node male">
+              <div class="cast-name">大陆轴线</div>
+              <div class="cast-role">东西向（欧亚）vs 南北向（美洲、非洲）</div>
+              <div class="cast-note">影响作物、牲畜、技术的传播速度</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">可驯化物种</div>
+              <div class="cast-role">大型哺乳动物（14种）+ 大种子植物</div>
+              <div class="cast-note">欧亚大陆得天独厚，其他大洲匮乏</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">更新世大灭绝</div>
+              <div class="cast-role">约 1.3 万年前大型哺乳动物灭绝</div>
+              <div class="cast-note">美洲、澳大利亚受创最重，欧亚、非洲较轻</div>
+            </div>
+            <div class="cast-node male">
+              <div class="cast-name">生态障碍</div>
+              <div class="cast-role">沙漠、雨林、高山、海洋</div>
+              <div class="cast-note">阻碍传播与迁徙</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">核心历史/社会概念</div>
+          <div class="cast-row">
+            <div class="cast-node female">
+              <div class="cast-name">食物生产</div>
+              <div class="cast-role">农业 + 畜牧业</div>
+              <div class="cast-note">一切近因（病菌、技术、文字、政治）的远因</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">人口密度</div>
+              <div class="cast-role">每平方英里可耕地的人口</div>
+              <div class="cast-note">决定社会复杂程度</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">病菌演化</div>
+              <div class="cast-role">源于家畜的传染病</div>
+              <div class="cast-note">天花、麻疹、流感等</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">政治组织</div>
+              <div class="cast-role">游群 → 部落 → 酋邦 → 国家</div>
+              <div class="cast-note">四阶段演化模型</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">技术传播</div>
+              <div class="cast-role">发明的采借与扩散</div>
+              <div class="cast-note">大多数社会采借 > 自行研发</div>
+            </div>
+            <div class="cast-node female">
+              <div class="cast-name">文字系统</div>
+              <div class="cast-role">字母 / 语标 / 音节</div>
+              <div class="cast-note">三次独立发明：苏美尔、墨西哥、中国/埃及</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cast-gen">
+          <div class="cast-gen-label">方法 / 原则</div>
+          <div class="cast-row">
+            <div class="cast-node other">
+              <div class="cast-name">安娜·卡列尼娜原则</div>
+              <div class="cast-role">"能驯化的动物都是相似的，驯化不成的各有各的原因"</div>
+              <div class="cast-note">成功需要多重条件，失败只需一个缺失</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">自然实验</div>
+              <div class="cast-role">波利尼西亚诸岛作为"中型实验"</div>
+              <div class="cast-note">莫里奥里人 vs 毛利人 = 小型实验</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">终极因 vs 近因</div>
+              <div class="cast-role">地理差异 → 食物生产 → 病菌/技术/文字/政治</div>
+              <div class="cast-note">因果链的层级结构</div>
+            </div>
+            <div class="cast-node other">
+              <div class="cast-name">语言学推论</div>
+              <div class="cast-role">语言分布 → 族群起源与扩张</div>
+              <div class="cast-note">格林伯格的非洲语系分类等</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>关键提示：</strong>戴蒙德反复强调，本书不是"种族主义"的解释——他明确否认有任何人类种族间的生物差异。所有差异都源于环境。同时，他反对"地理决定论"的标签：环境提供了不同的"起步素材"，但人类的创造力始终重要。本书的目标是"理解历史"，而非"为历史辩护"。
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">III</span>作者简介</h2>
+      <p>贾雷德·戴蒙德（Jared Diamond, 1937– ）是美国演化生物学家、生理学家、生物地理学家，加州大学洛杉矶分校（UCLA）生理学教授。他 1937 年生于波士顿，父亲是俄罗斯裔医学家（小儿血液学先驱），母亲是钢琴家、语言学家和教师。戴蒙德在哈佛大学本科读的是文学与语言（俄语、德语文学、作曲等），但大四时意识到自己想从事科学，遂转向生理学，在剑桥大学获得博士学位。他的博士研究聚焦胆囊运输盐和水机制，成为该领域的权威。</p>
+      <p>1964 年，戴蒙德前往新几内亚研究鸟类，这次旅行改变了他的人生。他被新几内亚岛的生物多样性和文化多样性深深吸引，先后前往 32 次。在新几内亚，他遇到了政治人物亚力，后者提出的"为什么是白人制造出这么多货物？"成为他写作《枪炮、病菌与钢铁》的直接动机。戴蒙德在新几内亚的田野调查也让他成为生态学和进化生物学领域的知名学者，其《第三种黑猩猩》（1991）和《崩溃》（2005）均为畅销书。</p>
+      <p>《枪炮、病菌与钢铁》于 1997 年出版，1998 年获普利策奖（非虚构类）。戴蒙德因此书成为公共知识分子，频繁出现在《纽约时报》《发现》等媒体上。他的写作风格以"大尺度比较"和"跨学科整合"著称，善于用具体的自然实验（如波利尼西亚诸岛）来阐明抽象的因果机制。中文版由王道还、廖月娟翻译，中信出版集团 2022 年推出增订版，附作者亲笔中文出版序及 15 位中国学者的解读。</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">IV</span>全书结构与核心论点</h2>
+      <p>全书分为三部分，共 20 章，外加开场白、收场白、前言、后记等。第一部分（第 1–3 章）提出问题：为什么不同大洲的人类社会发展轨迹不同？第二部分（第 4–10 章）分析食物生产的兴起与扩散：为什么农业只独立发源于少数地区？为什么传播速度有差异？第三部分（第 11–20 章）从食物生产推导近因：病菌、技术、文字、政治组织如何出现，并环游世界检验理论（澳大利亚、中国、波利尼西亚、美洲、非洲、日本）。</p>
+
+      <h3>故事梗概</h3>
+      <p>开场白中，戴蒙德借亚力的问题提出"终极问题"：为什么是欧洲人而非其他族群征服了世界？他拒绝种族主义解释（人类在遗传上平等），也拒绝简单的文化解释（回避了终极因）。他采用"洋葱式"方法，从最外层（现代世界的不均等）逐层剥开，直到最内层（地理环境的差异）。</p>
+      <p>第 1 章回顾人类历史：从 700 万年前人类起源，到 5 万年前"跳跃式演化"，再到 1.3 万年前各大洲陆续有人定居。戴蒙德强调，各大洲的"起步优势"在公元前 11000 年时难以判断——非洲有 500 万年演化史，但美洲、澳大利亚也各有潜力。真正的分界线在于食物生产的出现。</p>
+      <p>第 2–3 章用"自然实验"证明环境的影响：波利尼西亚诸岛（莫里奥里人 vs 毛利人）和皮萨罗俘虏阿塔瓦尔帕的案例，展示了环境如何决定社会复杂度和战争结果。第 4–10 章是理论核心：食物生产如何增加人口密度、供养专家、引发病菌、促进技术、催生文字和政治组织。第 11–20 章将这些原则应用于各大洲，解释为什么是欧亚大陆而非其他大洲跑在最前面。</p>
+      <p>收场白中，戴蒙德总结四组最重要的环境差异：可驯化物种、大陆轴线、与外界沟通的难易、面积与人口。他承认答案仍不完美，但强调"将人类史发展成一门科学"是未来的目标。他特别回应"地理决定论"的批评：环境提供了不同的起步素材，但人类的创造力始终重要——"要不是人类的创造活动，我们今天还在用石器切肉"。</p>
+
+      <h3>核心冲突</h3>
+      <ul class="points">
+        <li><strong>环境 vs 人类创造力</strong>——戴蒙德试图在两者之间找到平衡：环境提供了不同的"起步素材"，但人类始终在利用这些素材。他明确反对"地理决定论"的标签，也反对"种族主义"的解释。</li>
+        <li><strong>终极因 vs 近因</strong>——本书的因果链是层级式的：地理差异（终极因）→ 食物生产（远因）→ 病菌、技术、文字、政治组织（近因）→ 枪炮、病菌与钢铁（直接原因）。戴蒙德认为，只研究近因而忽略终极因，是传统历史学的缺陷。</li>
+        <li><strong>理解 vs 辩护</strong>——戴蒙德明确区分"解释历史"与"为历史辩护"：理解征服的因果链，是为了打断链条，而非延续恶行。他回应了三个反对理由：种族主义、欧洲中心主义、文明进步论。</li>
+      </ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">V</span>章节分析</h2>
+      <div class="note">
+        本 EPUB 共 24 个正文单元，对应原书 20 章 + 开场白 + 收场白 + 前言 + 后记。EPUB 的 role 标记有偏差（部分正文被标为 toc），但章节顺序与原书完全一致。以下按原书章节逐一分析。
+      </div>
+
+      <div class="chapter" id="c1">
+        <h3><span class="ch-num">Chapter 01</span>人类社会的起跑线</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>比较各大洲的历史发展，公元前 11000 年左右是个合适的起点。那时，一些地区出现了村落生活，人类开始栽种作物、豢养牲畜。戴蒙德带读者进行一趟"人类历史的旋风之旅"：从 700 万年前人类起源，到 50 万年前智人出现，再到 5 万年前"跳跃式演化"（现代语言能力、艺术、复合工具）。人类定居澳大利亚—新几内亚（需船）、美洲（克洛维斯人）、欧亚大陆最严寒地带。每次拓殖都伴随大型动物灭绝（过度猎杀假说 vs 气候假说）。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>各大洲在公元前 11000 年时的"起步优势"难以判断。非洲有 500 万年演化史，但美洲、澳大利亚也各有潜力。真正的分界线不在于"谁更早有人"，而在于"谁更早发展出食物生产"。戴蒙德用"考古学家回到公元前 11000 年"的思想实验证明：每个大洲都有潜力，但结果大不相同。</dd>
+          <dt>主题作用</dt>
+          <dd>确立全书的"起跑线"：公元前 11000 年，各大洲的人类在生物能力上无差异，差异在于环境。同时引入"过度猎杀"假说，为后文"可驯化物种减少"埋下伏笔。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c2">
+        <h3><span class="ch-num">Chapter 02</span>历史的自然实验</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>查塔姆群岛的莫里奥里人（爱好和平的狩猎—采集者）与新西兰毛利人（密集农业社会）的冲突。1835 年，毛利人入侵查塔姆群岛，杀戮、烹食莫里奥里人。两者本同源（波利尼西亚人），但因环境不同（查塔姆群岛寒冷、无法种植作物）而走上不同道路。波利尼西亚诸岛是"自然实验"：环境差异导致经济、技术、社会、政治组织的巨大差异。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>环境对人类社会的影响是真实的、可测量的。波利尼西亚的 6 种环境变量（气候、地质、海洋资源、面积、地形破碎化、隔绝程度）决定了人口密度、政治单元大小、社会复杂程度、物质文化。汤加（人口密集、政治统一、帝国）vs 查塔姆群岛（人口稀疏、平等、部落）vs 复活节岛（集约农业、巨像）vs 亨德森岛（贫瘠、简单）形成对比。</dd>
+          <dt>主题作用</dt>
+          <dd>证明"环境 → 社会"的因果链在短时段、小范围内成立。莫里奥里人的悲剧预示了后文"强者凭仗优势武器征服弱者"的模式，但强调差异源于环境而非人种。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c3">
+        <h3><span class="ch-num">Chapter 03</span>卡哈马卡的冲突</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>1532 年 11 月 16 日，皮萨罗率 168 名西班牙人在卡哈马卡俘虏印加皇帝阿塔瓦尔帕。阿塔瓦尔帕有 8 万大军，皮萨罗只有 62 名骑兵、106 名步兵。西班牙人凭枪炮、刀剑、马匹和钢铁甲胄获胜；印加人武器原始（石头、铜器、木棒）。天花已摧毁印加帝国（皇帝瓦伊纳·卡帕克及继承人死于 1526 年），使帝国陷入内战。皮萨罗的海事技术使他能从巴拿马横渡太平洋。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>西班牙人的优势不仅是武器和马匹，更是传染病（天花）。欧洲人有对天花的免疫力，美洲土著没有。前哥伦布时代约 95% 的美洲土著因传染病丧生。马匹、武器、钢铁是近因，但更深层的原因是：欧亚大陆有大型家畜（马、牛、羊），美洲只有骆马（分布有限、用途少）。</dd>
+          <dt>主题作用</dt>
+          <dd>将"亚力之问"具体化：为什么是西班牙人而非印加人征服对方？答案指向食物生产差异 → 家畜差异 → 病菌差异。同时引入"传染病"作为征服的关键近因。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c4">
+        <h3><span class="ch-num">Chapter 04</span>农民的力量</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>农业如何带来军事优势？戴蒙德以个人经历开篇：1956 年在蒙大拿农场打工，老板赫尔希（瑞士移民） vs 同事列维（黑脚印第安人）。赫尔希说："该死的船，把你从瑞士载来这里干吗！"——揭示了白人农民占领印第安人土地的历史。农业的四大优势：1) 更多食物 → 更多人口；2) 定居 → 储存食物 → 供养专家（国王、官僚、士兵）；3) 家畜提供肉、奶、肥料、驮运；4) 技术传播。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>食物生产是"远因"，病菌、技术、文字、政治是"近因"。农业族群在人数上碾压狩猎—采集族群（每英亩可养活 10–100 倍的人）。储存食物使复杂政治组织成为可能。家畜的四种用途：肉、奶、肥料、驮运。大型家养哺乳动物是"工业革命"的能源基础（在蒸汽机出现前）。</dd>
+          <dt>主题作用</dt>
+          <dd>建立全书的因果链模型：食物生产 → 人口密度 → 社会复杂化 → 军事优势。这是连接"终极因"（地理）与"直接原因"（枪炮）的桥梁。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c5">
+        <h3><span class="ch-num">Chapter 05</span>历史上的有与无</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>食物生产只独立发源于 5–9 个地区：西南亚（肥沃新月地带）、中国、中美洲、南美洲安第斯山脉、美国东部（可能还有非洲萨赫勒、西非、埃塞俄比亚、新几内亚）。其他地区的农业是引进的（如欧洲、埃及、印度）。考古证据：碳14测年、动植物遗骸形态差异。驯化物种的时间、地点表：西南亚最早（约公元前 8500 年植物，前 8000 年动物），美国东部晚 6000 年。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>食物生产的发源地是"边陲"而非"谷仓"：肥沃新月地带、墨西哥、安第斯、中国部分地区在今日看来干旱或生态欠佳。为什么？因为驯化只发生在少数"优势地区"，这些地区有特别适合驯化的野生动植物。今日的大谷仓（美国、欧洲、澳大利亚）在史前时代没有农业，因为缺乏可驯化物种。</dd>
+          <dt>主题作用</dt>
+          <dd>用考古证据将"农业起源"具体化、定年化。同时提出一个反直觉观点：农业发源地不是今日最肥美的土地，这为后文"可驯化物种分布"埋下伏笔。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c6">
+        <h3><span class="ch-num">Chapter 06</span>下田好，还是打猎好？</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>为什么有些族群选择务农，有些拒绝？戴蒙德破除三个错误观念：1) 食物生产不是"发明"，而是"演化"；2) 狩猎—采集与农业不是绝对二分（有些狩猎—采集者定居，有些农民流动）；3) 狩猎—采集者并非不管理土地（他们会促进可食用植物生长）。第一批农民从未见过农业，他们的选择是"无心的"。觅食决策基于：最大回报、降低风险、文化偏好、价值观。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>食物生产的采纳是渐进的、无意识的。农民的工作时间可能比狩猎—采集者更长，营养更差，寿命更短。那为什么还选择农业？因为野生食物供应不足，农业是"未雨绸缪"。邻近的狩猎—采集者观察到农业成果后，有意识地采纳或拒斥。例子：德意志海岸族群在农民邻居定居 1300 年后才改行。</dd>
+          <dt>主题作用</dt>
+          <dd>破除"农业 = 进步"的线性史观。强调农业采纳的复杂性和渐进性。为下一章"驯化的植物学"做铺垫。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c7">
+        <h3><span class="ch-num">Chapter 07</span>杏仁的前世今生</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>驯化植物如何从野生植物演化而来？戴蒙德以"茅坑"和"痰盂"作为最早的"农业研究实验室"：人类采集果实、丢弃果核，无意中播种。选择压力：果实大小（人类偏好大果）、种子苦味（苦味防止被动物吃，但人类会采集）、种子传播机制。例子：野杏仁含氰化物，但人类会煮沸或浸泡去除；豌豆重量增加 10 倍；玉米从 2 厘米长到 45 厘米。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>驯化是"无意"过程：植物演化出吸引人类采食的特性，人类无心中选择、播种。人类的选择标准：果实大小、苦味、易于收获。结果是作物与野生始祖的显著差异：更大、更甜、种子更大、成熟期一致、不自然落粒。</dd>
+          <dt>主题作用</dt>
+          <dd>用植物学的细节证明"驯化"是演化过程，而非人类有意识的发明。为下一章"为什么有些地区能驯化植物，有些不能"做铺垫。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c8">
+        <h3><span class="ch-num">Chapter 08</span>是苹果的问题，还是印第安人的问题？</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>为什么有些地区能自行发展农业，有些不能？两种解释：1) 问题出在当地人（文化、态度）；2) 问题出在野生植物（可驯化物种的可用性）。戴蒙德比较三个地区：肥沃新月地带（最早、最多作物）、新几内亚（少量作物）、美国东部（更少作物）。结论：不是印第安人"笨"，而是他们缺乏可驯化的野生植物。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>20 万种野生植物中，只有几千种可供人类食用，几百种被驯化。现代世界 80% 的作物产量来自十几种植物。为什么有些地区无法驯化本地植物？因为"可驯化"需要特定条件：大种子、生长一致、易于收获。例子：非洲南部有野生高粱，但当地土著未驯化，2000 年后班图人带来作物；北美有野生苹果和葡萄，但印第安人未驯化。</dd>
+          <dt>主题作用</dt>
+          <dd>用"可驯化植物"的稀缺性解释农业起源的地理差异。强调这不是人种差异，而是环境差异。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c9">
+        <h3><span class="ch-num">Chapter 09</span>斑马、不幸福的婚姻与安娜·卡列尼娜原则</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>驯化动物与驯化植物类似：只有少数物种被驯化。全世界 14 种大型食草哺乳动物被驯化（牛、绵羊、山羊、猪、马、骆驼、驴、骆马等）。安娜·卡列尼娜原则：能驯化的动物都是相似的，驯化不成的各有各的原因。六种失败原因：生长速度、圈养倾向、恐慌倾向、社会结构、食性、脾气。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>14 种大型家畜中，13 种原产于欧亚大陆（含北非），美洲只有 1 种（骆马，分布有限），澳大利亚和撒哈拉以南非洲 0 种。为什么斑马未被驯化？生长太慢、易恐慌、群居性差。为什么非洲有这么多大型哺乳动物却无家畜？因为可驯化物种稀缺。大象可被驯服但不可驯化（无法在人工环境繁殖）。</dd>
+          <dt>主题作用</dt>
+          <dd>用"安娜·卡列尼娜原则"概括动物驯化的失败模式。强调欧亚大陆在大型哺乳动物上的得天独厚，这是征服的关键近因。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c10">
+        <h3><span class="ch-num">Chapter 10</span>大陆轴线——历史的伏笔</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>大陆轴线影响传播速度：欧亚大陆是东西向，美洲、非洲是南北向。东西向传播快，因为同一纬度气候相似，作物、牲畜、技术容易适应。南北向传播慢，因为气候带差异大。例子：肥沃新月地带的作物 2500 年传到英国，但墨西哥的玉米 4000 年才到美国东部。作物传播还受生态障碍（沙漠、雨林、高山）影响。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>大陆轴线是"隐藏的"地理特征，对历史影响深远。欧亚大陆的东西向轴线使作物、牲畜、技术快速传播，形成统一的优势。美洲和非洲的南北向轴线导致传播缓慢、碎片化。基因分析证明：西南亚作物只被驯化一次（传播快），美洲作物被多次独立驯化（传播慢）。</dd>
+          <dt>主题作用</dt>
+          <dd>引入"大陆轴线"作为第四组环境差异之一。这是全书最反直觉的地理特征之一：各大洲的形状走向决定了历史的轨迹。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c11">
+        <h3><span class="ch-num">Chapter 11</span>牲畜的致命礼物</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>源于动物的人类疾病是征服的关键。戴蒙德以医师朋友遇到的怪病案例开篇：男子与母羊性行为后感染肺炎。这是"源自动物的人类疾病"的例子。近代史上，天花、流感、肺结核、疟疾、瘟疫、麻疹、霍乱等杀手都源于动物。二战前，微生物夺走的生命比枪炮更多。欧洲人征服美洲，病菌比武器更致命。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>为什么欧亚与美洲之间病菌交流如此不对等？因为欧亚大陆有 13 种大型家畜，人类与牲口密切接触数千年，家畜病菌演化出适应人体的版本。美洲只有 1 种家畜（骆马），且无大型贸易网络传播病菌。天花、麻疹、流感等"人群"疾病在欧亚大陆演化，美洲土著无免疫力。前哥伦布时代 95% 的美洲土著死于传染病。</dd>
+          <dt>主题作用</dt>
+          <dd>将"病菌"作为征服的第一近因。强调家畜数量差异 → 病菌演化差异 → 人口死亡差异 → 军事征服可行性差异的因果链。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c12">
+        <h3><span class="ch-num">Chapter 12</span>蓝本和借来的字母</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>文字如何起源与传播？三种文字策略：字母（音素）、语标（词）、音节（音节）。独立发明文字只有几次：苏美尔楔形文字（约前 3000 年）、埃及（前 3000 年？）、中国（前 1300 年？）、墨西哥（前 600 年）。其他文字都是借用的。苏美尔人发明楔形文字的过程：记账 → 泥板 → 符号抽象化 → 画谜原则（同音假借）。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>文字独立发明极难，因为需要解决"语音分析"问题。苏美尔人的突破：用同音的可描绘名词代表抽象名词（如"弓"代表"生命"，因为苏美尔语中都是 ti）。文字传播：肥沃新月地带的文字传到埃塞俄比亚、阿拉伯，但墨西哥文字未传到安第斯。文字与帝国、商业、宗教扩张密切相关。</dd>
+          <dt>主题作用</dt>
+          <dd>分析"文字"这一近因的起源与传播。强调文字不是"文明"的必然标志，而是特定环境的产物。同时展示"采借"在文化演化中的重要性。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c13">
+        <h3><span class="ch-num">Chapter 13</span>发明为需求之母</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>技术发展为何有地理差异？戴蒙德以斐斯托斯圆盘（公元前 1700 年克里特岛的"印刷品"）开篇，提出核心问题：为什么技术发明集中在欧亚大陆？两种错误解释：1) 英雄史观（少数天才）；2) 社会保守主义（仇视变迁）。正确解释：技术发展与人口密度、社会复杂度、竞争压力相关。许多发明是好奇心的产物，而非"需求"。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>技术演化依赖：1) 发明者数量（人口多 → 天才多）；2) 采借与竞争（社会复杂 → 信息交流快）；3) 资金与市场需求（食物盈余 → 商业）。例子：爱迪生发明留声机时未预见"复制音乐"的主要用途；瓦特蒸汽机原为抽水，后用于火车。许多发明是"为找用途而找用途"。</dd>
+          <dt>主题作用</dt>
+          <dd>将"技术"作为近因之一。强调技术不是孤立的天才行为，而是社会复杂化的产物。人口密度 → 发明数量 → 采借速度 → 技术积累的因果链。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c14">
+        <h3><span class="ch-num">Chapter 14</span>从人人平等到盗贼统治</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>政治组织如何从游群演化到国家？戴蒙德以法玉族（新几内亚的游群社会）开篇：他们无政府、无法律、靠亲属关系解决争端。传教士使法玉族进入现代世界。政治组织四阶段：游群（5–80 人）、部落（几百人）、酋邦（几千人，有首领）、国家（万人以上，官僚、法律）。每个阶段需要食物生产提供盈余。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>社会复杂化是食物生产的直接后果：定居 → 储存 → 剩余 → 供养专家（首领、官僚、祭司）→ 强制征税 → 阶级分化。例子：法玉族无酋邦，新几内亚高地人（农业）有部落酋长，汤加（集约农业）有帝国。复杂社会在战争中有优势：能供养全职士兵、文士、祭司。</dd>
+          <dt>主题作用</dt>
+          <dd>将"政治组织"作为近因之一。强调国家不是"进步"的必然，而是食物盈余的政治利用。盗贼统治（精英征税）是国家的阴暗面。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c15">
+        <h3><span class="ch-num">Chapter 15</span>亚力的族人</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>澳大利亚是检验理论的绝佳案例：最干燥、最小、最平坦、最贫瘠、最孤立的大陆。4 万年前澳大利亚土著有诸多领先（最早磨制石器、有柄石器、船只、岩画），但为何最终被欧洲人征服？答案：澳大利亚缺乏可驯化的动植物。新几内亚（面积小得多）却是农业社会，因为新几内亚有可驯化物种（如芋头、香蕉、猪）。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>澳大利亚的"落后"不是人种差异，而是环境差异：缺乏可驯化的大型哺乳动物和植物。更新世大灭绝使澳大利亚巨型动物消失，没有驯化机会。托雷斯海峡岛民（农民）与澳大利亚土著（狩猎—采集者）只隔 10 英里，但技术不传播，因为缺乏"需求"（海产丰富）和"媒介"（船只、贸易网络）。</dd>
+          <dt>主题作用</dt>
+          <dd>用澳大利亚作为"最极端案例"检验理论。证明即使有人口、有技术起点，缺乏可驯化物种也会导致社会停滞。同时引入"技术传播"的阻力（生态、文化、经济障碍）。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c16">
+        <h3><span class="ch-num">Chapter 16</span>中国——东亚之光</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>中国是世界上人口最多的国家，但历史上长期统一。为什么？戴蒙德分析：中国有两大农业中心（华北粟作、华南稻作），独立发展食物生产，与肥沃新月地带几乎同时。中国的生态复杂、生物资源丰富，供养了最多人口。但为何中国未像欧洲一样保持政治分裂、最终主导现代世界？答案：地理。中国海岸线平滑、腹地连通，易统一；欧洲海岸曲折、山脉分隔，易分裂。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>中国的统一不是文化"优越性"，而是地理的产物。华北、华南的作物传播：粟从华北传到华南，稻从华南传到华北，最终在黄河流域融合。中国的文字系统（汉字）独立于苏美尔，但传播到韩国、日本、越南。中国的"技术第一"（铸铁、罗盘、造纸、印刷）在唐宋达到顶峰。</dd>
+          <dt>主题作用</dt>
+          <dd>用中国案例证明"统一 vs 分裂"也受地理影响。回应"中国中心论"和"西方中心论"两种偏见。强调中国在现代的落后（18–19 世纪）不是必然，而是政治统一导致的技术停滞。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c17">
+        <h3><span class="ch-num">Chapter 17</span>开往波利尼西亚的快船</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>南岛语族扩张是过去 6000 年最大规模的人口流动。源自中国南方沿海的南岛语族，约 4000 年前登陆台湾，3000 年前开始向东南亚、菲律宾、印度尼西亚扩张，2000 年前到达马达加斯加，1000 年前到达波利尼西亚。他们凭借：航海技术（双体独木舟）、农业（芋头、香蕉、猪、鸡）、社会组织（部落、酋邦）。为什么是南岛语族而非其他族群扩张？因为他们有农业和航海技术。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>南岛语族扩张证明：农业 + 航海技术 = 殖民能力。语言证据：南岛语系有 959 种语言，分布在从马达加斯加到复活节岛的广大区域。考古证据：大坌坑文化（台湾，约公元前 4000 年）是南岛语族的祖先，有磨制石器、陶器、稻米、石网坠。南岛语族取代或同化了菲律宾、印度尼西亚的狩猎—采集者（如尼格利陀人）。</dd>
+          <dt>主题作用</dt>
+          <dd>用南岛语族扩张展示"农业 + 航海"的组合如何推动大规模殖民。这是"食物生产 → 人口密度 → 技术 → 扩张"因果链的典型案例。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c18">
+        <h3><span class="ch-num">Chapter 18</span>两个半球的碰撞</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>为什么是欧洲人征服美洲，而非美洲人征服欧洲？戴蒙德总结：1) 食物生产：欧亚大陆有 13 种大型家畜 + 多种作物，美洲只有 1 种家畜（骆马）+ 玉米为主；2) 病菌：欧亚大陆有天花、麻疹等，美洲没有；3) 技术：欧亚大陆有金属、轮子、大帆船，美洲只有石器、木器、筏子；4) 政治组织：欧亚大陆有帝国、官僚，美洲只有酋邦、部落；5) 文字：欧亚大陆有文字，美洲只有中美洲一小片地区。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>五大近因都源于一个终极因：食物生产差异。食物生产 → 人口密度 → 病菌演化、技术积累、政治复杂化、文字发明。美洲的"落后"不是人种差异，而是环境差异：缺乏可驯化物种 + 南北向轴线导致传播缓慢。</dd>
+          <dt>主题作用</dt>
+          <dd>全书的高潮：将前 17 章的理论应用于"新旧大陆碰撞"。给出一个完整的因果链：地理 → 食物生产 → 人口 → 近因 → 征服。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c19">
+        <h3><span class="ch-num">Chapter 19</span>非洲是怎么变成黑人的非洲的？</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>非洲是人类起源地，有五大人类族群（黑人、白人、俾格米人、科伊桑人、亚洲人）。但为何分布最广的是黑人？答案：班图人扩张。约 5000 年前，说班图语的黑人从喀麦隆/尼日利亚东部出发，向南扩张，取代了科伊桑人和俾格米人。为什么是班图人？因为他们有农业（高粱、小米、非洲稻）+ 家畜（牛）。语言学证据：班图语有 500 种语言，非常相似，说明扩张时间晚（分化不足）。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>班图人扩张是"食物生产 → 人口密度 → 军事优势"的又一案例。语言学证明：尼日尔-刚果语系起源于西非，班图语支从中部非洲扩张。体质人类学证明：俾格米人和科伊桑人原先分布广，现被压缩到边缘。马达加斯加岛的南岛语族（亚洲人）证明跨印度洋的远距离传播。</dd>
+          <dt>主题作用</dt>
+          <dd>用非洲案例证明理论在非欧亚大陆的适用性。强调"黑人的非洲"是班图人扩张的结果，而非"非洲的本质"。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c20">
+        <h3><span class="ch-num">Chapter 20</span>日本人是什么人？</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>日本人的起源是语言学中最有争议的问题。四种矛盾理论：1) 冰期猎人；2) 中亚游牧民族；3) 朝鲜移民；4) 混合。戴蒙德的答案：日本是"混合"——绳文人（旧石器）弥生人（稻作农民，来自朝鲜/中国东北）古坟人（技术官僚，来自朝鲜）。证据：基因（绳文 vs 弥生）、语言（日语与阿尔泰语系？）、考古（陶器、稻作、金属器）。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>日本的历史是"三层"：1) 绳文人（约 1.3 万年前，狩猎—采集）；2) 弥生人（约 2300 年前，稻作，来自朝鲜半岛）；3) 古坟人（约 1700 年前，技术，来自朝鲜半岛）。阿伊努人是绳文人的后裔，被日本人大规模征服（19 世纪）。日语的起源仍不明确，但与阿尔泰语系（突厥、蒙古、通古斯）可能有关。</dd>
+          <dt>主题作用</dt>
+          <dd>用日本案例展示"混合"在民族形成中的作用。同时展示考古学、遗传学、语言学的综合应用。回应日本人的"单一民族"神话。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c21">
+        <h3><span class="ch-num">收场白</span>人类史这门科学的未来</h3>
+        <dl>
+          <dt>关键情节 / 本章概要</dt>
+          <dd>戴蒙德总结四组最重要的环境差异：1) 可驯化物种；2) 大陆轴线；3) 与外界沟通的难易；4) 面积与人口。他承认答案不完美，但强调长时段比较研究的价值。他回应"地理决定论"的批评：环境提供素材，人类创造力始终重要。未来方向：量化比较、短期小范围研究、解释"为何中国/欧洲在 1400–1800 年角色互换"。</dd>
+          <dt>核心论点 / 关键证据</dt>
+          <dd>中国 vs 欧洲的对比是全书最发人深省的部分：中国先驰得点（唐宋技术领先），但 1405–1433 年后停止远洋航行，颁布禁海令；欧洲分裂，哥伦布四次失败后找到西班牙国王资助。为什么？地理：中国统一、海岸平滑、腹地连通；欧洲分裂、海岸曲折、山脉分隔。政治统一导致技术停滞，政治分裂导致技术竞争。</dd>
+          <dt>主题作用</dt>
+          <dd>收束全书，将焦点从"为何是欧亚"转向"为何是欧洲而非中国/其他"。强调历史科学的目标：理解过去，以史为鉴。</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">VI</span>金句摘录</h2>
+      <ol class="quotes">
+        <li>
+          为什么是白人制造出这么多货物，再运来这里？为什么我们黑人没搞出过什么名堂？
+          <span class="src">开场白 · 亚力的问题</span>
+        </li>
+        <li>
+          要是我们能理解这两种岛屿社会发展差异的原因，或许就有了一个能帮助我们理解各大洲发展差异这个更宏大问题的模型。
+          <span class="src">第二章 历史的自然实验</span>
+        </li>
+        <li>
+          能驯化的动物都是相似的，驯化不成的动物各有各的原因。
+          <span class="src">第九章 斑马、不幸福的婚姻与安娜·卡列尼娜原则</span>
+        </li>
+        <li>
+          食物生产是枪炮、病菌与钢铁的远因。没有食物生产，就没有人口密度；没有人口密度，就没有复杂的社会；没有复杂的社会，就没有技术、文字、病菌和中央集权政府。
+          <span class="src">第四章 农民的力量</span>
+        </li>
+        <li>
+          各大洲的大陆轴线走向影响深远，甚至是人世悲剧的源头。
+          <span class="src">第十章 大陆轴线——历史的伏笔</span>
+        </li>
+        <li>
+          在过去 1.3 万年的历史中，人类各族群通过征服、流行病与灭族行动而互动，就是塑造现代世界的力量。
+          <span class="src">开场白 亚力的问题</span>
+        </li>
+        <li>
+          要不是人类的创造活动，我们今天还在用石器切肉，茹毛饮血，像我们 100 万年前的祖先一样。所有的人类社会都有发明天才。不过有些环境提供了更多的起步素材，提供了更适合利用新发明的情境。
+          <span class="src">收场白 人类史这门科学的未来</span>
+        </li>
+        <li>
+          中国船队的结局可以为我们提供一条线索。1405 年至 1433 年，中国船队七下西洋。后来朝中大臣与太监斗争，大臣占了上风后，就不再维持船队。这样的事例在人类政治史上并不少见。但是中国的例子有一点不同，因为中国是个统一的国家，只要一个决定，就可以使全中国的船队停摆。
+          <span class="src">收场白 中国与欧洲的分裂 vs 统一</span>
+        </li>
+        <li>
+          我们今天所知的'文明'与'野蛮'的分别，其实全是历史发展的偶然，而不是自然的高低。
+          <span class="src">前言 为什么说世界历史就像洋葱一样？</span>
+        </li>
+        <li>
+          我写这本书，是为了理解历史，而不是为了赞美历史。
+          <span class="src">收场白</span>
+        </li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VII</span>批判性思考与延伸</h2>
+      <h3>优点与局限</h3>
+      <ul class="points">
+        <li><strong>优点：</strong>宏大视野与精密因果链的结合；用"自然实验"（波利尼西亚、澳大利亚、日本）使抽象理论具体化；多学科整合（考古、语言、基因、历史）；明确反对种族主义解释，具有道德勇气；普利策奖实至名归。</li>
+        <li><strong>局限：</strong>对"病菌"的讨论偏重数量（95% 美洲土著死亡），但忽略殖民暴力的直接作用（屠杀、奴役）；对"中国"的讨论偏重地理决定论，低估文化、制度的独立作用；部分读者认为"环境决定论"的标签仍有道理，尽管戴蒙德反复否认；对"可驯化物种"的列表可能过于简化（有些"不可驯化"物种后来被驯化，如火鸡）。</li>
+        <li><strong>历史背景：</strong>写作于 1997 年，正值"大历史"兴起和全球史观扩张期。戴蒙德受新文化史、环境史、科学史影响，但拒绝极端文化相对主义。本书与《欧洲的崛起》（Eric Wolf）、《人类之网》（John McNeill）等形成对话。</li>
+      </ul>
+
+      <h3>适合 / 不适合的读者</h3>
+      <ul class="points">
+        <li><strong>适合：</strong>对世界史、人类演化、考古学感兴趣的读者；想理解"为什么不同社会有不同命运"的读者；喜欢"大尺度比较"和"思想实验"的读者；对"地理决定论"vs"文化决定论" debate 感兴趣的读者。</li>
+        <li><strong>不适合：</strong>寻找具体历史叙事的读者（本书是理论驱动，案例服务于理论）；期待"平衡视角"的读者（戴蒙德立场鲜明）；对数字和图表反感的读者（本书有大量数据、地图、表格）。</li>
+      </ul>
+
+      <h3>互为补充 / 对照的书</h3>
+      <ul class="points">
+        <li><strong>《崩溃》（Collapse, 2005）</strong>——戴蒙德自己的续作，讨论社会崩溃的原因（生态、政治、外部贸易），与《枪炮》形成"崛起 vs 崩溃"的对照。</li>
+        <li><strong>《人类之网》（The Human Web, John McNeil, 2003）</strong>——全球史观的经典，强调"网络"而非"树状"演化，与戴蒙德的"地理决定论"形成补充。</li>
+        <li><strong>《西方将主宰多久吗？》（Why the West Rules—For Now, Ian Morris, 2010）</strong>——用"社会发展指数"量化比较东西方，与戴蒙德有相似关怀，但更强调文化的作用。</li>
+        <li><strong>《棉花：一部全球史》（Cotton: The Fabric That Made the World, Sven Beckert, 2014）</strong>——用单一商品（棉花）串起全球史，展示"大历史"如何落地到具体商品。</li>
+        <li><strong>《1493：物种大交换的世界史》（1493: Uncovering the New World Columbus Created, Charles Mann, 2011）</strong>——用"哥伦布大交换"（动植物、病菌、人口）细化戴蒙德的宏观理论。</li>
+      </ul>
+
+      <div class="note">
+        <strong>版本说明：</strong>本笔记基于中信出版集团 2022 年 1 月版（ISBN 9787521736816），由王道还、廖月娟翻译。原书为 1997 年 W. W. Norton 出版，2010 年、2018 年有修订版。本版为"全新版本，全面增补校订"，附作者亲笔中文出版序及 15 位中国学者的解读。正文约 15.0 万字（汉字数），脚注 0 字。EPUB 提取共 45 个单元，其中正文单元 24 个（EPUB 4–45），对应原书开场白 + 20 章 + 收场白 + 前言 + 后记 + 致谢 + 延伸阅读。所有章节分析基于实际阅读，未依赖摘要或外部资料。由于篇幅限制，部分细节（如具体的碳14测年数据、动植物驯化年表）未完全展开，建议读者阅读原文。
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">枪炮、病菌与钢铁</div>
+  <div>Guns, Germs, and Steel · 读书笔记 · 生成于 2026</div>
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
