@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>围城 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #3d5a6c;
+    --accent-soft: #dde6ea;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(150,175,190,.2), transparent 60%), linear-gradient(180deg, #1f2d36 0%, #46626f 100%);
+    --hero-text: #eef2f4;
+    --hero-subtitle: rgba(238,242,244,.72);
+    --hero-meta: rgba(238,242,244,.78);
+    --hero-accent: #c9a05a;
+    --hero-divider: rgba(238,242,244,.18);
+    --progress-gradient: linear-gradient(90deg, #3d5a6c, #c9a05a);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(180,200,210,.08), transparent 40%), radial-gradient(circle at 80% 70%, rgba(201,160,90,.06), transparent 40%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: .4em;
+    color: var(--hero-accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em;
+    margin: 0 0 20px;
+    line-height: 1.2;
+    color: var(--hero-text);
+  }
+  .hero .subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--hero-subtitle);
+    letter-spacing: .1em;
+    margin-bottom: 36px;
+  }
+  .hero .meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--hero-meta);
+    padding-top: 20px;
+    border-top: 1px solid var(--hero-divider);
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-right: 16px;
+    border-right: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block;
+    padding: 6px 0 6px 22px;
+    color: var(--text-soft);
+    text-decoration: none;
+    position: relative;
+    line-height: 1.5;
+    transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc;
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em;
+    position: relative;
+  }
+  h2::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 60px; height: 2px;
+    background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    margin-right: 14px;
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 36px 0 14px;
+    padding-left: 14px;
+    border-left: 3px solid var(--gold);
+    line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead {
+    font-size: 18.5px;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  blockquote {
+    margin: 24px 0;
+    padding: 20px 24px 20px 28px;
+    background: var(--quote-bg);
+    border-left: 3px solid var(--accent);
+    color: var(--text-soft);
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+    position: relative;
+  }
+  blockquote::before {
+    content: "\201C";
+    position: absolute;
+    top: 2px; left: 8px;
+    font-family: Georgia, serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--accent-soft);
+    pointer-events: none;
+  }
+  blockquote p { margin: 0 0 10px; position: relative; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote .src {
+    display: block;
+    font-style: normal;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    letter-spacing: .05em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: #f0e6d8;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .1em;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fbf8ef; }
+  td:first-child { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06);
+  }
+  .chapter h3 {
+    margin: 0 0 16px;
+    padding: 0 0 12px;
+    border-left: none;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px;
+    position: relative;
+    line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6";
+    position: absolute;
+    left: 4px; top: 10px;
+    color: var(--gold);
+    font-size: 10px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 12px;
+    border-radius: 999px;
+    letter-spacing: .05em;
+  }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote;
+    padding: 22px 24px 22px 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    position: relative;
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute;
+    left: 20px; top: 22px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quotes .src {
+    display: block;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    letter-spacing: .05em;
+  }
+
+  .note {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    background: #f5f1e5;
+    border-radius: 4px;
+    margin: 16px 0;
+    line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px 60px;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    letter-spacing: .1em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: ..3em;
+    margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif);
+    font-size: 3.4em;
+    float: left;
+    line-height: .9;
+    padding: 6px 10px 0 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .cast-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 32px 24px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+  }
+  .cast-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--text-soft);
+    padding: 14px 18px;
+    background: #f7f3ea;
+    border-radius: 6px;
+    margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .cast-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .cast-node {
+    flex: 0 0 auto;
+    min-width: 140px;
+    padding: 10px 14px;
+    background: #faf6ec;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .cast-name .aka {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .cast-role {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .cast-note {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .cast-connector {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: -8px 0 8px;
+  }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>围城</h1>
+  <div class="subtitle">城外的人想冲进去，城里的人想逃出来</div>
+  <div class="meta">
+    <span><strong>类型</strong>长篇小说 / 讽刺喜剧</span>
+    <span><strong>作者</strong>钱钟书</span>
+    <span><strong>字数</strong>约 20 万字（正文）</span>
+    <span><strong>篇章</strong>序 + 9 章 + 附录</span>
+    <span><strong>出版</strong>人民文学出版社 · 2017</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物关系与命名谱系</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与故事梗概</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">第一章 · 归国邮轮</a></li>
+          <li><a href="#c2">第二章 · 回乡相亲</a></li>
+          <li><a href="#c3">第三章 · 苏家唐家</a></li>
+          <li><a href="#c4">第四章 · 赵辛楣登场</a></li>
+          <li><a href="#c5">第五章 · 赴内地旅途</a></li>
+          <li><a href="#c6">第六章 · 三闾大学</a></li>
+          <li><a href="#c7">第七章 · 汪家与订婚</a></li>
+          <li><a href="#c8">第八章 · 桂林香港</a></li>
+          <li><a href="#c9">第九章 · 围城收束</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">《围城》是钱钟书 1947 年出版的长篇小说，也是他唯一一部长篇小说。它以抗战初期归国知识分子方鸿渐的经历为轴，写他在爱情、职业、婚姻中的一次次"冲进去"与"逃出来"，最终落在一个"围城"式的困局里。钱钟书用学者式的渊博与刻薄，把一群留学、教育、婚姻中的都市男女钉在一个时代的哈哈镜里。</p>
+      <p>方鸿渐是克莱登大学的假博士——一个连他自己都"还要讲良心"的谎言。他随邮轮归国，被苏文纨小姐若即若离，被鲍小姐吸引又抛弃，爱上有"局部的真理"之称的唐晓芙，却因苏文纨告知的"过去"而失恋。他赴内地三闾大学任教，撞进学术界的倾轧与官场规则，被高松年一句话停聘。他与"毫无兴趣而很有打算"的孙柔嘉由同行而结婚，又在柴米油盐中决裂。全书结尾，那只比标准时间慢五小时的祖传老钟敲响六下，"包涵对人生的讽刺和感伤，深于一切语言、一切啼笑"。</p>
+      <p>"围城"二字是书眼，也是中国人耳熟能详的比喻。它来自褚慎明引英国谚语（结婚如金漆鸟笼，笼外想进、笼内想出）与苏文纨补出的法国谚语（城外的人想冲进去，城里的人想逃出来）。这则隐喻贯穿方鸿渐的每一段关系与每一次进退：买假文凭是"进城"，被揭破是"出城"；追求唐晓芙是进城，被拒是出城；进三闾大学是进城，被停聘是出城；与孙柔嘉结婚是进城，决裂是出城。人生在他笔下成了一座没有出口的城。</p>
+      <p>《围城》的价值不在情节的曲折，而在讽刺的密度与精度。钱钟书把比喻当刀使，把人物品格外貌写成漫画，把心理活动写得纤毫毕现，把学术界的谎言、官场的权术、婚姻里的算计一一挑破。它写的是 1930-40 年代的知识分子，却处处照见人性里那些不分时代的、可笑的、可悲的"围城"困境。</p>
+      <div class="tags">
+        <span class="tag">长篇小说</span>
+        <span class="tag">讽刺喜剧</span>
+        <span class="tag">知识分子</span>
+        <span class="tag">围城隐喻</span>
+        <span class="tag">钱钟书</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+      <h2><span class="num">II</span>人物关系与命名谱系</h2>
+      <div class="cast-legend">
+        <span><span class="swatch" style="background:#2d5f8a"></span>男性</span>
+        <span><span class="swatch" style="background:#a04e7a"></span>女性</span>
+        <span><span class="swatch" style="background:#b08d4f"></span>机构 / 隐喻</span>
+      </div>
+      <div class="cast-tree">
+        <div class="cast-gen">
+          <div class="cast-gen-label">中心 · 方鸿渐</div>
+          <div class="cast-row">
+            <div class="cast-node male"><div class="cast-name">方鸿渐</div><div class="cast-role">克莱登假博士 · 三闾大学副教授 · 报馆资料室主任 · "志大才疏，常满腹牢骚"</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">归国邮轮 · 上海（苏文纨圈）</div>
+          <div class="cast-row">
+            <div class="cast-node female"><div class="cast-name">苏文纨</div><div class="cast-role">里昂博士 · "艳如桃李，冷若冰霜" · 后嫁曹元朗</div></div>
+            <div class="cast-node female"><div class="cast-name">鲍小姐</div><div class="cast-role">归国途中 · "局部的真理" · 水性杨花</div></div>
+            <div class="cast-node male"><div class="cast-name">赵辛楣</div><div class="cast-role">鸿渐好友 · 政治编辑 · "身大而心不大"</div></div>
+            <div class="cast-node female"><div class="cast-name">唐晓芙</div><div class="cast-role">苏表妹 · 真正的"女孩子" · 鸿渐的挚爱</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">三闾大学 · 学术界</div>
+          <div class="cast-row">
+            <div class="cast-node male"><div class="cast-name">高松年</div><div class="cast-role">校长 · "老科学家" · 官僚权术</div></div>
+            <div class="cast-node male"><div class="cast-name">李梅亭</div><div class="cast-role">中文系主任 · 好色贪小利 · 假斯文</div></div>
+            <div class="cast-node male"><div class="cast-name">韩学愈</div><div class="cast-role">历史系主任 · 假博士 · 娶白俄太太</div></div>
+            <div class="cast-node male"><div class="cast-name">顾尔谦</div><div class="cast-role">历史系副教授 · 势利 · "笑容比脸年轻三十岁"</div></div>
+            <div class="cast-node male"><div class="cast-name">陆子潇</div><div class="cast-role">历史系教授 · 爱搬嘴 · 好色疑心</div></div>
+            <div class="cast-node male"><div class="cast-name">汪处厚</div><div class="cast-role">中文系主任 · 官僚 · "做官栽筋斗如猫落地"</div></div>
+            <div class="cast-node female"><div class="cast-name">汪太太</div><div class="cast-role">续弦 · 与辛楣散步被撞破</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">方家 · 姻亲 · 婚姻</div>
+          <div class="cast-row">
+            <div class="cast-node male"><div class="cast-name">方遯翁</div><div class="cast-role">前清举人 · 鸿渐之父 · 附庸风雅</div></div>
+            <div class="cast-node male"><div class="cast-name">周经理</div><div class="cast-role">点金银行总经理 · 鸿渐挂名岳父</div></div>
+            <div class="cast-node female"><div class="cast-name">孙柔嘉</div><div class="cast-role">辛楣同事之女 · "毫无兴趣而很有打算"</div></div>
+            <div class="cast-node female"><div class="cast-name">陆太太</div><div class="cast-role">柔嘉之母 · 教训"要饿他冻他"</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">机构与隐喻</div>
+          <div class="cast-row">
+            <div class="cast-node other"><div class="cast-name">克莱登大学</div><div class="cast-role">假文凭出处 · 鸿渐与韩学愈共用</div></div>
+            <div class="cast-node other"><div class="cast-name">三闾大学</div><div class="cast-role">战时内地大学 · 学界倾轧的围城</div></div>
+            <div class="cast-node other"><div class="cast-name">祖传老钟</div><div class="cast-role">慢五小时 · "时间落伍"的隐喻收束</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="note">命名提示：方鸿渐之名即隐喻"方"是规矩的、"鸿渐"出《易经》（鸿飞渐陆，进退不定）；孙柔嘉之"柔嘉"出《诗经》（"敬尔威仪，无不柔嘉"），反衬她外柔内刚的"打算"。</div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">III</span>作者简介</h2>
+      <p>钱钟书（1910—1998），江苏无锡人，中国现代学者、作家。1929 年入清华大学外文系，1933 年毕业后赴英，1935 年考取英庚款赴牛津大学英文系，1937 年获副博士学位（B.Litt.），后入巴黎大学研究。1938 年回国，先后任教于西南联大、清华大学、蓝田师范学院等。夫人杨绛是著名剧作家、翻译家、作家。</p>
+      <p>钱钟书学贯中西，博及百家，尤以融汇西方文学、哲学、心理学与古典文化著称，有"文化昆仑"之誉。学术著作有《谈艺录》（1948 初版，1983 补订）、《管锥编》（1979）等，以札记体形式熔铸古今、打通中西，号称"以管锥之见，窥天地之全"。</p>
+      <p>《围城》是钱钟书唯一一部长篇小说。1944 年动笔于沦陷的上海，1946 年完成，1947 年出版，曾连载于《文艺复兴》月刊。小说以抗战初期归国知识分子群像为题材，以精妙绝伦的讽刺艺术成为中国现代文学的经典，被誉为"新《儒林外史》"。1990 年电视剧《围城》播出后，作品影响进一步扩大，成为跨越时代的国民读物。</p>
+      <div class="note">说明：本节生卒年、学历、著作依据既有公开知识整理，本次写作环境未获实时联网核验。</div>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">IV</span>全书结构与故事梗概</h2>
+      <h3>故事梗概</h3>
+      <p>1937 年夏，假博士方鸿渐随邮轮归国，在上海周家、苏家之间周旋，爱唐晓芙不成。抗战吃紧，他接受赵辛楣之邀赴三闾大学任教，途中历经李梅亭的荒唐，到校又遭高松年停聘。他回上海后与孙柔嘉结婚，又因两个家庭的不和与性格冲突而决裂。全书以一只走慢五个小时的祖传老钟收束，方鸿渐在钟声里走向未知的"围城"之外。</p>
+      <h3>核心冲突</h3>
+      <ul class="points">
+        <li><strong>围城隐喻</strong>：城外的人想冲进去，城里的人想逃出来。方鸿渐的每段关系与每次进退都是围城式的体验，无解。</li>
+        <li><strong>真与假的冲突</strong>：假文凭（克莱登）、假博士（韩学愈）、假道学（李梅亭）、假斯文——知识与谎言在知识分子身上扭结。</li>
+        <li><strong>志大才疏的内心冲突</strong>：方鸿渐聪明、懒散、不切实际、心软被动，明知是假却还要假戏真做，是"道义上的懦夫"。</li>
+        <li><strong>外部：抗战背景</strong>：战事推进与情节同步，催生战时大学、战时经济、知识分子迁徙潮与战时丑态。</li>
+      </ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">V</span>章节分析</h2>
+      <div class="note">原书 9 章（序 + 9 章 + 附录《记钱钟书与围城》）。EPUB 按阅读顺序分为 12 个 body 单元，其中部分大单元合并多章；以下按原书 9 章逐一分析，附录要点另列于结构部分。</div>
+
+      <div class="chapter" id="c1">
+        <h3><span class="ch-num">Chapter 01</span>归国邮轮</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>1937 年夏，白拉日隆子爵号自欧驶向中国。方鸿渐在船上被苏文纨冷淡、被鲍小姐吸引，甲板接吻、西贡之夜暧昧又戛然而止——鲍小姐回船即挽着未婚夫的手，原来"她相貌和他像极了"是引诱人的谎。抵港后苏小姐勾上赵辛楣，抛下方鸿渐。章末交代方鸿渐履历：克莱登假文凭、未婚妻周淑英病故、回乡演讲出洋相。</dd>
+          <dt>人物与关系</dt>
+          <dd>方鸿渐（被动、自嘲）；苏文纨（艳如桃李冷若冰霜）；鲍小姐（局部的真理）；赵辛楣（登场即成"情敌"）。</dd>
+          <dt>主题与手法</dt>
+          <dd>开篇即点出"围城"母题：方鸿渐在两段关系间被抛弃。讽刺笔法已立——"忠厚老实人的恶毒，像饭里的砂砾"。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c2">
+        <h3><span class="ch-num">Chapter 02</span>回乡相亲</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>方鸿渐回乡，周家接风席上因"芝麻酥糖"口误得罪周太太，报纸又登出"克莱登大学哲学博士"假新闻，羞愧难当。赴沪后住周家被丈母娘嫌恶；周经理招他为婿、安排与张小姐相亲，他独赢三百元张家却赖账，婚事作罢。战事吃紧，全家避居沪上，方鸿渐决意去内地。</dd>
+          <dt>人物与关系</dt>
+          <dd>周经理周太太（挂名岳父母，周太太"肝胃气"）；张吉民（情敌，留学生）；张小姐（相亲对象）。</dd>
+          <dt>主题与手法</dt>
+          <dd>假文凭的阴影挥之不去；"妻子如衣服，衣服也等于妻子"的自嘲，奠定方鸿渐"志大才疏"的基调。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c3">
+        <h3><span class="ch-num">Chapter 03</span>苏家唐家</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>春天去苏家，苏文纨介绍表妹唐晓芙，方鸿渐一见倾心。赵辛楣误认他为情敌，傲慢挑衅，方鸿渐索性不还手，借逗唐晓芙开心。苏家茶会、饭局，方鸿渐拆穿曹元朗扇上旧作是苏文纨自己的诗，二人转冷。苏与曹订婚；唐晓芙从苏口中得知方鸿渐的"过去"，决然退信。大雨之夜，方鸿渐淋雨痴立唐家门口。</dd>
+          <dt>人物与关系</dt>
+          <dd>唐晓芙（摩登文明社会里的罕物，真正的"女孩子"）；苏文纨（工于心计）；曹元朗（新派诗人，不通而仗势欺人）。</dd>
+          <dt>主题与手法</dt>
+          <dd>"围城"隐喻首次完整出现：褚慎明引英国鸟笼谚语，苏文纨补出法国"城外冲进、城内逃"。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c4">
+        <h3><span class="ch-num">Chapter 04</span>赵辛楣登场</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>赵辛楣来函请方鸿渐去三闾大学任教（高松年电报聘"教授"，月薪三百四十元）。方鸿渐失恋又失业。他搬回方家遭方遯翁斥责、弟媳冷嘲；周经理软硬兼施送四个月薪水，他怒辞不受。赴约途中遇李梅亭、顾尔谦、孙柔嘉。赵辛楣坦陈"同情兄"的来历（同师兄弟、同学、同情——同有一个情人）。</dd>
+          <dt>人物与关系</dt>
+          <dd>方遯翁（前清举人，附庸风雅）；李梅亭（黑眼镜黑呢西装，名片衔头堆砌）；顾尔谦（金牙，笑容比脸年轻三十岁）；孙柔嘉（长圆脸微雀斑，素净怕生）。</dd>
+          <dt>主题与手法</dt>
+          <dd>方鸿渐与赵辛楣"不打不相识"，成全书最重要的友谊；孙柔嘉的"怕生"已伏"刁滑"之笔。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c5">
+        <h3><span class="ch-num">Chapter 05</span>赴内地旅途</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>方鸿渐与辛楣先上船，李顾谎称买到大菜间实坐三等舱。宁波—溪口—金华—鹰潭—南城—宁都一路，李梅亭荒唐事不断：借绿绸伞、掉进田里、为车票冒充辛楣、与妓女王美玉搭线、把西药藏在箱底骗过顾尔谦；顾尔谦的板门床、势利嘴脸。孙柔嘉一路文静，鸿渐在桥后照顾她。火车上辛楣点破孙小姐"刁滑"，预言"借书是男女恋爱必然的初步"。</dd>
+          <dt>人物与关系</dt>
+          <dd>李梅亭（好色贪小利，箱中一半是西药）；王美玉（寡妇，与李纠缠）；阿福；孙柔嘉（借"方先生在哄我"一句让辛楣起疑）。</dd>
+          <dt>主题与手法</dt>
+          <dd>旅途是小型的"围城"演练场；"借书"警句埋下孙柔嘉的"心机"。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c6">
+        <h3><span class="ch-num">Chapter 06</span>三闾大学</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>校长高松年（研究昆虫学的"老科学家"）以"细胞之于有机体"论招无名之辈。鸿渐到校被降级为副教授（辛楣是教授），汪处厚以"先进门三日就是大"抢走教授职位。鸿渐教论理学被学生瞧不起。陆子潇炫耀"行政院"信封、无意泄露鸿渐买克莱登文凭。韩学愈登场，自称克莱登毕业、娶白俄太太为"美国人"。鸿渐代孙柔嘉出头，与刘东方合力揭发韩学愈买通旁听生发匿名告示。</dd>
+          <dt>人物与关系</dt>
+          <dd>高松年（官僚权术，停聘鸿渐）；韩学愈（假博士，与鸿渐暗比文凭真假）；陆子潇（爱搬嘴，捡到《共产主义论》密报李梅亭）；汪处厚（抢职位）。</dd>
+          <dt>主题与手法</dt>
+          <dd>三闾大学是学界的"围城"；"得学位是把论文哄过自己的先生；教书是把讲义哄过自己的学生"——学历社会的反讽。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c7">
+        <h3><span class="ch-num">Chapter 07</span>汪家与订婚</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>汪处厚新娶二十五岁的汪太太。汪家宴上，汪太太做媒欲把范小姐配辛楣、刘小姐配鸿渐。宴后散步，汪太太与赵辛楣被高松年、汪处厚撞见，她一句"何必问来问去，自寻烦恼"脱身；辛楣当夜不辞而别。鸿渐受托护送孙小姐回家，李顾起哄"订婚"，鸿渐顺势将错就错；孙小姐父亲来信问"匿名信"，鸿渐始知已订婚。高校长突然停聘鸿渐（因陆子潇拾到辛楣丢下的《共产主义论》拉斯基小册子），临行送去一封冷冰冰的"缓办哲学系"推荐信。</dd>
+          <dt>人物与关系</dt>
+          <dd>汪太太（工于心计，与辛楣散步被撞破）；范小姐、刘小姐（做媒对象）；辛楣（负气出走三闾大学）。</dd>
+          <dt>主题与手法</dt>
+          <dd>辛楣的退场是方鸿渐孤独的加深；"订婚"的将错就错启动婚姻"围城"。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c8">
+        <h3><span class="ch-num">Chapter 08</span>桂林香港</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>方鸿渐与孙柔嘉在桂林—香港旅途中，辛楣撮合他们注册结婚。香港旅馆里两人拌嘴，鸿渐推柔嘉，打碎玻璃杯，柔嘉回娘家（陆家）住。陆太太教柔嘉"男人不能spoil的，要饿他，冻他，虐待他"，并要替柔嘉在厂里谋事。鸿渐在报馆谋得资料室主任。婚后夫妇与方家、孙家皆不睦：方遯翁送自鸣钟（每时慢七分钟，"方府三代传家之宝"），二奶奶三奶奶来"查访"，柔嘉受气。</dd>
+          <dt>人物与关系</dt>
+          <dd>陆太太（教训"要饿他冻他"，婚姻里的"军师"）；方遯翁（送祖传钟，迂腐）；李妈（搬嘴）；王经理（报馆上司）。</dd>
+          <dt>主题与手法</dt>
+          <dd>婚姻进入"围城"内部：两个家庭的角力、性格的冲突；自鸣钟的"慢七分钟"为结尾老钟埋线。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c9">
+        <h3><span class="ch-num">Chapter 09</span>围城收束</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>方家兄弟妯娌嫌隙在柔嘉进门后彻底暴露；方遯翁日记仍把婚事写成"节用省事"。柔嘉在纱厂谋得人事科职位，鸿渐靠辛楣介绍进华美新闻社。报馆风波、恐吓信、辞职连锁；鸿渐随王先生辞职。回方家吃冬至晚饭，周太太当众数落柔嘉。鸿渐失业在家，柔嘉赌气回娘家；陆太太登门，鸿渐推柔嘉，柔嘉一怒回娘家。鸿渐深夜出门，左颊被柔嘉掷来的象牙梳子打伤；天明回家，柔嘉已带走行李。祖传老钟敲六下——"包涵对人生的讽刺和感伤，深于一切语言、一切啼笑"。</dd>
+          <dt>人物与关系</dt>
+          <dd>方鸿渐与孙柔嘉（婚姻决裂，左颊负伤）；周太太、二奶奶三奶奶（家族倾轧）。</dd>
+          <dt>主题与手法</dt>
+          <dd>全书在走慢五小时的老钟声中收束，"时间落伍"绾合"人生落伍"，围城困境永无出口。</dd>
+        </dl>
+      </div>
+
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">VI</span>金句摘录</h2>
+      <ol class="quotes">
+        <li>忠厚老实人的恶毒，像饭里的砂砾或者出骨鱼片里未净的刺，会给人一种不期待的伤痛。<span class="src">第一章 · 归国邮轮</span></li>
+        <li>城外的人想冲进去，城里的人想逃出来。<span class="src">第三章 · 围城隐喻的原始出处</span></li>
+        <li>这一张文凭，仿佛有亚当、夏娃下身那片树叶的功用，可以遮羞包丑；小小一方纸能把一个人的空疏、寡陋、愚笨都掩盖起来。<span class="src">第三章 · 鸿渐自白</span></li>
+        <li>撒谎往往是高兴快乐的流露，也算得一种创造，好比小孩子游戏里的自骗自。<span class="src">第四章 · 鸿渐自嘲</span></li>
+        <li>借了要还的，一借一还，一本书可以做两次接触的借口，而且不着痕迹。这是男女恋爱必然的初步，一借书，问题就大了。<span class="src">第五章 · 旅途 · 辛楣的警句</span></li>
+        <li>得学位是把论文哄过自己的先生；教书是把讲义哄过自己的学生。<span class="src">第六章 · 三闾大学</span></li>
+        <li>那种眉花耳笑的美满结婚照相，全不是当时照的。<span class="src">第七章 · 辛楣观感</span></li>
+        <li>这个时间落伍的计时机无意中包涵对人生的讽刺和感伤，深于一切语言、一切啼笑。<span class="src">第九章 · 结尾</span></li>
+        <li>在这本书里，我想写现代中国某一部分社会、某一类人物。写这类人，我没忘记他们是人类，只是人类，具有无毛两足动物的基本根性。<span class="src">序 · 钱钟书自题</span></li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VII</span>批判性思考与延伸</h2>
+
+      <h3>优点与局限</h3>
+      <ul class="points">
+        <li><strong>讽刺艺术的高峰</strong>：钱钟书把比喻当刀使，人物外貌漫画化、心理描写纤毫毕见，几乎每一页都有"陌生的熟悉感"，是汉语讽刺美学的标杆。</li>
+        <li><strong>隐喻的统摄力</strong>："围城"既是书名也是哲学命题，把婚姻、职业、人生的进退失据绾合为一个无解的结构，具有惊人的概括力。</li>
+        <li><strong>局限</strong>：作为讽刺喜剧，它"只破不立"——除了围城隐喻，很少提供出路；方鸿渐的被动与"志大才疏"既是真实也是作者设置的"笑点"，读者若代入感不足会觉其"可恨又可怜"；部分段落机锋过密，初读者易被密集的比喻淹没而忽略情节。</li>
+      </ul>
+
+      <h3>适合 / 不适合的读者</h3>
+      <ul class="points">
+        <li><strong>适合</strong>：喜爱机智反讽、语言艺术的知识分子读者；对民国知识分子群像、婚姻与职场困境有兴趣的人；想体会汉语比喻美学巅峰的人。</li>
+        <li><strong>不太适合</strong>：期待情节曲折、情感浓烈的读者；对方鸿渐式"被动主角"易生不耐者；偏好"爽文"式价值判断者。</li>
+      </ul>
+
+      <h3>互为补充 / 对照的书</h3>
+      <ul class="points">
+        <li><strong>《儒林外史》（吴敬梓）</strong>：中国讽刺小说的源头，同写知识分子的虚伪与科举之毒，可对照中西讽刺传统。</li>
+        <li><strong>《洗澡》（杨绛）</strong>：同写知识分子在政治运动中的际遇，与《围城》的讽刺互补，且杨绛为《围城》作注。</li>
+        <li><strong>《谈艺录》《管锥编》（钱钟书）</strong>：理解钱钟书学问深度与中西贯通的钥匙。</li>
+        <li><strong>《围城》附录《记钱钟书与围城》（杨绛）</strong>：了解创作背景与人物原型的必读互文。</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">围城</div>
+  钱钟书长篇小说 · 读书笔记 · 生成于 2026
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

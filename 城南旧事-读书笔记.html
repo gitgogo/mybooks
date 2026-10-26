@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城南旧事 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #b5715a;
+    --accent-soft: #f2e0d6;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(240,210,170,.25), transparent 60%), linear-gradient(180deg, #6b4a3a 0%, #c99a72 100%);
+    --hero-text: #fbf3e8;
+    --hero-subtitle: rgba(251,243,232,.72);
+    --hero-meta: rgba(251,243,232,.78);
+    --hero-accent: #e8c48a;
+    --hero-divider: rgba(251,243,232,.18);
+    --progress-gradient: linear-gradient(90deg, #b5715a, #e8c48a);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(245,220,180,.1), transparent 40%), radial-gradient(circle at 80% 70%, rgba(232,196,138,.08), transparent 40%);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: .4em;
+    color: var(--hero-accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em;
+    margin: 0 0 20px;
+    line-height: 1.2;
+    color: var(--hero-text);
+  }
+  .hero .subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--hero-subtitle);
+    letter-spacing: .1em;
+    margin-bottom: 36px;
+  }
+  .hero .meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--hero-meta);
+    padding-top: 20px;
+    border-top: 1px solid var(--hero-divider);
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-right: 16px;
+    border-right: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block;
+    padding: 6px 0 6px 22px;
+    color: var(--text-soft);
+    text-decoration: none;
+    position: relative;
+    line-height: 1.5;
+    transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc;
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em;
+    position: relative;
+  }
+  h2::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 60px; height: 2px;
+    background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    margin-right: 14px;
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 36px 0 14px;
+    padding-left: 14px;
+    border-left: 3px solid var(--gold);
+    line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead {
+    font-size: 18.5px;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  blockquote {
+    margin: 24px 0;
+    padding: 20px 24px 20px 28px;
+    background: var(--quote-bg);
+    border-left: 3px solid var(--accent);
+    color: var(--text-soft);
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+    position: relative;
+  }
+  blockquote::before {
+    content: "\201C";
+    position: absolute;
+    top: 2px; left: 8px;
+    font-family: Georgia, serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--accent-soft);
+    pointer-events: none;
+  }
+  blockquote p { margin: 0 0 10px; position: relative; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote .src {
+    display: block;
+    font-style: normal;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    letter-spacing: .05em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: #f2e6da;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .1em;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fbf8ef; }
+  td:first-child { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06);
+  }
+  .chapter h3 {
+    margin: 0 0 16px;
+    padding: 0 0 12px;
+    border-left: none;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px;
+    position: relative;
+    line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6";
+    position: absolute;
+    left: 4px; top: 10px;
+    color: var(--gold);
+    font-size: 10px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 12px;
+    border-radius: 999px;
+    letter-spacing: .05em;
+  }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote;
+    padding: 22px 24px 22px 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    position: relative;
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute;
+    left: 20px; top: 22px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quotes .src {
+    display: block;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    letter-spacing: .05em;
+  }
+
+  .note {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    background: #f5f1e5;
+    border-radius: 4px;
+    margin: 16px 0;
+    line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px 60px;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    letter-spacing: .1em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: ..3em;
+    margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif);
+    font-size: 3.4em;
+    float: left;
+    line-height: .9;
+    padding: 6px 10px 0 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .cast-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 32px 24px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+  }
+  .cast-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--text-soft);
+    padding: 14px 18px;
+    background: #f7f3ea;
+    border-radius: 6px;
+    margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .cast-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .cast-node {
+    flex: 0 0 auto;
+    min-width: 140px;
+    padding: 10px 14px;
+    background: #faf6ec;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .cast-name .aka {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .cast-role {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .cast-note {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .cast-connector {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: -8px 0 8px;
+  }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>城南旧事</h1>
+  <div class="subtitle">让实际的童年过去，心灵的童年永存下来</div>
+  <div class="meta">
+    <span><strong>类型</strong>自传体童年小说 / 短篇集</span>
+    <span><strong>作者</strong>林海音</span>
+    <span><strong>字数</strong>约 8 万字（正文）</span>
+    <span><strong>篇目</strong>序 + 6 篇故事 + 后记</span>
+    <span><strong>出版</strong>人民文学出版社 · 2020</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物与角色</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与故事梗概</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c0">序 · 冬阳·童年·骆驼队</a></li>
+          <li><a href="#c1">惠安馆</a></li>
+          <li><a href="#c2">我们看海去</a></li>
+          <li><a href="#c3">兰姨娘</a></li>
+          <li><a href="#c4">驴打滚儿</a></li>
+          <li><a href="#c5">爸爸的花儿落了</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">《城南旧事》是林海音定居台湾后追忆北京童年之作，以一个叫英子的小女孩的视角，串起惠安馆、我们看海去、兰姨娘、驴打滚儿、爸爸的花儿落了五个故事。它写的不是情节，而是一连串"离别"——疯子秀贞与小桂子惨死、草丛里的小偷被捕、兰姨娘随德先叔离去、宋妈丢子失女还乡、最后爸爸病逝。每段故事的结尾，那位主角都"离我而去"；直到亲爱的爸爸也去了，"我的童年结束了"。</p>
+      <p>这本书最动人处，在于它用一颗童稚的心去照成人世界的复杂。英子不断遭遇"疯子与正常人""好人与坏人""蓝天与大海"的是非难题。她执意亲近被大人斥为"疯子"的秀贞、被叫"贼"的小偷，凭本心分辨善恶而非世俗标签。所谓"人生难得是欢聚，惟有别离多"，全书在温婉含蓄的调子里，写人世的艰难，也写童年的纯真。</p>
+      <p>林海音 1948 年父亲病逝后离开生活近三十年的北京、定居台湾，这本书正是因海峡两岸的距离而生，饱含因之而生的深沉乡愁。京味的风俗画——胡同、骆驼队、井窝子、惠安馆、出红差、唱话匣子的、城南游艺园、驴打滚儿——跃然纸上。它既是"回忆童年生活、追忆往日时光"的代名词，也是研究北京近代民俗的重要文学资料。</p>
+      <p>结构上，六篇故事按时间顺序编排，是"一个懵懂的孩子刚刚开始'睁眼看世界'的全记录"。表面松散，内在却有一条成长线：从惠安馆（初尝友谊与苦涩）、我们看海去（初辨是非的困惑）、兰姨娘（以童智干预成人情感、维护母亲）、驴打滚儿（直面底层苦难），到爸爸的花儿落了（被迫成为"小小的大人"）。英子从需要大人庇护的孩子，一步步走向能"自己管自己，并且管弟弟和妹妹"的长女。书名本身也因此成为"回忆童年"的代名词。</p>
+      <div class="tags">
+        <span class="tag">自传体童年小说</span>
+        <span class="tag">儿童视角</span>
+        <span class="tag">离别母题</span>
+        <span class="tag">京味乡愁</span>
+        <span class="tag">林海音</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+      <h2><span class="num">II</span>人物与角色</h2>
+      <div class="cast-legend">
+        <span><span class="swatch" style="background:#2d5f8a"></span>男性</span>
+        <span><span class="swatch" style="background:#a04e7a"></span>女性</span>
+        <span><span class="swatch" style="background:#b08d4f"></span>其他 / 群像</span>
+      </div>
+      <div class="cast-tree">
+        <div class="cast-gen">
+          <div class="cast-gen-label">中心 · 叙述者</div>
+          <div class="cast-row">
+            <div class="cast-node male"><div class="cast-name">林英子</div><div class="cast-role">六至十三岁的小姑娘 · 全书线索人物与第一人称叙述者</div><div class="cast-note">善良仗义、倔强聪明、敏感早熟；是友情的撮合者、世事的目击者，目送一个个大人离去</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">惠安馆 · 疯子秀贞母女</div>
+          <div class="cast-row">
+            <div class="cast-node female"><div class="cast-name">秀贞<span class="aka">（英子称"三婶"）</span></div><div class="cast-role">惠安馆"疯"女子 · 思康之恋、小桂子生母</div><div class="cast-note">痴情坚贞，苦等六年、苦寻女儿；母女相认后连夜出走，同殁</div></div>
+            <div class="cast-node female"><div class="cast-name">妞儿<span class="aka">（即小桂子）</span></div><div class="cast-role">被养父母捡来学戏的女孩 · 井窝子边的小伙伴</div><div class="cast-note">黄毛小辫、有泪坑、被养父毒打；与秀贞相认后冒雨投奔思康，惨死火车轮下</div></div>
+            <div class="cast-node male"><div class="cast-name">思康<span class="aka">（三叔）</span></div><div class="cast-role">北大学生 · 秀贞恋人</div><div class="cast-note">言而有信却一去不返，音讯全无</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">我们看海去 · 草丛里的人</div>
+          <div class="cast-row">
+            <div class="cast-node male"><div class="cast-name">厚嘴唇的大朋友<span class="aka">（草丛小偷）</span></div><div class="cast-role">藏赃的窃贼 · 为供弟留学而偷 · 英子的"道义朋友"</div><div class="cast-note">嘴唇厚敦、老实相、有担当；被便衣诱捕，英子无意中"点路"</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">兰姨娘 · 成人情感的介入</div>
+          <div class="cast-row">
+            <div class="cast-node female"><div class="cast-name">兰姨娘</div><div class="cast-role">施家下堂姨太 · 后独立谋生 · 寄居林家</div><div class="cast-note">圆扁脸、镶金牙、爱俏敢反抗；与德先叔离去</div></div>
+            <div class="cast-node male"><div class="cast-name">德先叔<span class="aka">（四眼狗）</span></div><div class="cast-role">北大生 · "新青年"革命者 · 父友</div><div class="cast-note">戴黑框眼镜、躲风声居林家；与兰姨娘相恋，双双离开北京</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">驴打滚儿 · 底层女性的苦难</div>
+          <div class="cast-row">
+            <div class="cast-node female"><div class="cast-name">宋妈</div><div class="cast-role">顺义县奶妈 · 哺育英子弟弟 · 照顾英子家十余年</div><div class="cast-note">善良唠叨、重男轻女、命运多舛；子死女失，终骑驴还乡</div></div>
+            <div class="cast-node male"><div class="cast-name">小栓子</div><div class="cast-role">宋妈之子 · 宋妈的独子</div><div class="cast-note">九岁给人看牛，掉河淹死（死时未及放牛）</div></div>
+            <div class="cast-node female"><div class="cast-name">丫头子</div><div class="cast-role">宋妈之女 · 宋妈的姑娘</div><div class="cast-note">四岁被送人当奶妈，寻遍京城无果</div></div>
+            <div class="cast-node male"><div class="cast-name">黄板儿牙</div><div class="cast-role">宋妈的丈夫</div><div class="cast-note">赶马车的，带宋妈回乡"算账"</div></div>
+          </div>
+        </div>
+        <div class="cast-connector">│</div>
+        <div class="cast-gen">
+          <div class="cast-gen-label">爸爸的花儿落了 · 家人与告别</div>
+          <div class="cast-row">
+            <div class="cast-node male"><div class="cast-name">爸爸</div><div class="cast-role">林英子之父 · 客家人、曾赴日经商</div><div class="cast-note">严慈并济，爱花、爱交朋友、热心助人、是非分明；结局：肺病病逝</div></div>
+            <div class="cast-node female"><div class="cast-name">妈妈</div><div class="cast-role">林英子之母</div><div class="cast-note">温厚，多孕，护家</div></div>
+            <div class="cast-node male"><div class="cast-name">厨子老高</div><div class="cast-role">林家厨子 · 传信者</div><div class="cast-note">到校/到家报爸爸病危的噩耗</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="note">阅读提示：本书人物关系不是家族谱系，而是"英子目送的一位位大人"。每个故事的核心人物几乎都"离她而去"，离别是贯穿全书的收束机制；英子是唯一贯穿始终的目击者与叙述者。</div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="num">III</span>作者简介</h2>
+      <p>林海音（1918—2001），原名林含英，小名英子，原籍台湾苗栗（一说广东蕉岭），生于日本大阪。1921 年随父母回到北京，在城南（今北京西城一带）长大，先后住过椿树胡同、新帘子胡同、虎坊桥、梁家园等地，在北京生活了近二十五年。北京成为她文学创作的重要源泉。1948 年因父亲病逝返回故乡台湾，定居台北，积极从事文学活动，1967 年创办《纯文学》月刊，推动纯文学发展。</p>
+      <p>《城南旧事》是她的成名作与代表作，1960 年出版，以童年视角回忆在北京城南的见闻，通过英子的眼睛展现 20 世纪 20 年代老北京的社会风貌，被改编为 1983 年吴贻弓执导的同名电影，广受好评。她被誉为"台湾文学的祖母级人物"，代表作另有《晓云》《春风》等。1983 年荣获"世界华文作家协会"颁赠的"文学成就奖"。2001 年 12 月 1 日因肺衰竭在台北去世，享年 83 岁，骨灰安放北京，实现了她"叶落归根"的夙愿。</p>
+      <div class="note">说明：本节生卒年、生平与文学地位依据既有公开知识整理，本次写作环境未获实时联网核验。</div>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">IV</span>全书结构与故事梗概</h2>
+      <h3>故事梗概</h3>
+      <p>六篇故事按英子从六岁到十三岁的成长时间顺序编排。序篇《冬阳·童年·骆驼队》以看骆驼、系铃铛引出"童年却一去不还"的感怀，点出写作动机。随后五篇各自独立又情感连贯：惠安馆里，英子撮合秀贞与失散的女儿小桂子（妞儿），母女冒雨相寻、惨死轮下；新帘子胡同里，英子在草丛边结识为供弟弟读书而偷窃的"厚嘴唇"男人，又在毕业礼上发现他是自己同学之弟；林家中，英子以童智撮合兰姨娘与德先叔；宋妈的儿女一死一失，她跑遍京城寻女无果；最后，重病的爸爸不能来校，英子代表同学领毕业证书、唱骊歌，归家时夹竹桃已落、爸爸病逝——她骤然成为能撑起家的大孩子。</p>
+      <h3>核心冲突</h3>
+      <ul class="points">
+        <li><strong>童年与告别的冲突</strong>：每一篇的主角都"离我而去"，离别是贯穿全书的核心母题；父丧标志"我的童年结束了"。</li>
+        <li><strong>童稚之眼与成人世界标签的冲突</strong>：英子不断遭遇"疯子/正常人""好人/坏人""蓝天/大海"的是非难题，凭本心而非标签辨善恶。</li>
+        <li><strong>个人情感与旧俗伦理的冲突</strong>：妞儿与秀贞的相认、宋妈的重男轻女、兰姨娘的反抗，都是个体情感与旧式道德的碰撞。</li>
+        <li><strong>海峡之隔的乡愁</strong>：定居台湾后追忆童年北京，使"城南旧事"既是私人记忆，也是一代人的文化乡愁。</li>
+      </ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">V</span>章节分析</h2>
+      <div class="note">EPUB 按 spine 分为多个单元（含前言、各篇 split 文件、后记、延伸阅读），正文故事为序篇 + 6 篇。以下按故事顺序逐篇分析；"延伸阅读"等为出版材料，不计入。</div>
+
+      <div class="chapter" id="c0">
+        <h3><span class="ch-num">序</span>冬阳·童年·骆驼队</h3>
+        <dl>
+          <dt>本篇概要</dt>
+          <dd>英子看门前驮煤的骆驼咀嚼，与父亲争论系铃铛是为防狼还是为耐长途寂寞（她偏说为添行路情趣）。四季流转，骆驼冬来夏去，而"童年却一去不还"。篇末点题：写下来，"让实际的童年过去，心灵的童年永存下来"——遂成《城南旧事》。这是全书的情感总纲与引子。</dd>
+          <dt>英子的观察与感悟</dt>
+          <dd>以一个孩子对"理所当然"之事的执拗发问，引出对时间流逝、记忆与书写的最初思考；骆驼的"慢"与童年的"一去不还"形成对照。</dd>
+          <dt>主题作用</dt>
+          <dd>奠定全书怀旧温婉的基调，点明"书写童年"的动机，与终篇"爸爸的花儿落了"首尾呼应。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c1">
+        <h3><span class="ch-num">Chapter 01</span>惠安馆</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>大人都怕惠安馆的"疯子"秀贞，英子偏要接近；她在井窝子边结识妞儿，又常听秀贞讲思康三叔与小桂子的往事，从秀贞的反复念叨与妞儿的身世（被养父毒打、脖后有青记）中，慢慢悟出妞儿就是秀贞失散的女儿小桂子。她牵线让母女相认，并偷来母亲的金镯子给二人做盘缠。然而秀贞带妞儿冒雨赶火车去寻思康，惨死车轮下；英子高烧昏迷十日，被全家叮嘱"把过去的事全忘了"。</dd>
+          <dt>人物与关系</dt>
+          <dd>英子（撮合者、目击者）；妞儿/小桂子（小伙伴，实为秀贞之女）；秀贞（痴情坚贞，"三婶"）；思康（一去不返的恋人）。这是小英子初尝友谊甜蜜与世事苦涩、由明媚走向悲剧的一章，也是全书最重最动人的篇章。</dd>
+          <dt>主题作用</dt>
+          <dd>以"疯子"与"正常人"的错位，写英子凭本心而非标签辨善恶；母女生离死别的悲剧，是"离别"母题的第一记重击。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c2">
+        <h3><span class="ch-num">Chapter 02</span>我们看海去</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>搬家到新帘子胡同，英子在荒草丛边捡皮球时，发现草丛里蹲着一个"厚嘴唇敦敦"的男人。他为供成绩优异、立志留洋的弟弟读书而偷窃，请英子保密，二人结为"道义朋友"，并约定一起"看海去"。英子念课文《我们看海去》时说出"分不清天空和大海、好人和坏人"。毕业典礼上，她发现那个领毕业证的男孩正是小偷的弟弟，心中震动。后来一个收破烂的便衣（男人所赠铜佛引来）设局诱捕了小偷，英子既震惊又抗拒——她不要像妈妈说的那样把"坏人"写成书。</dd>
+          <dt>人物与关系</dt>
+          <dd>英子；"厚嘴唇的大朋友"（为弟偷窃的窃贼，英子的"道义朋友"）；便衣（诱捕者）。英子无意中的"点路"（让贼把东西藏到草堆里）成为捕与逃的关键。</dd>
+          <dt>主题作用</dt>
+          <dd>把"好人/坏人"的标签彻底消解——为供养弟弟而偷的贼，比许多"好人"更可亲；以《我们看海去》课文的"蓝天/大海"暗喻是非难辨。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c3">
+        <h3><span class="ch-num">Chapter 03</span>兰姨娘</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>兰姨娘被施家赶出、寄居林家。英子起初讨厌她（怕她夺走爸爸、气坏妈妈），见爸爸与兰姨娘烧鸦片闹"朱砂手"后更是又恨又怕。但英子很快聪明地"撮合"：她向兰姨娘夸德先叔、向德先叔夸兰姨娘，促成这对新青年相爱。兰姨娘与德先叔看完《傀儡家庭》深受触动，双双离去。爸爸寂寞而失落，英子心里既得意又对爸爸生出同情。</dd>
+          <dt>人物与关系</dt>
+          <dd>英子（以童智介入成人情感的"撮合者"）；兰姨娘（敢反抗的下堂姨太）；德先叔（"新青年"革命者）。此章写孩童的智慧如何微妙地维护母亲、调节成人关系。</dd>
+          <dt>主题作用</dt>
+          <dd>以孩子的视角看成人情感的暗流，"维护母亲"的动机里已有对家庭关系的敏感；兰姨娘的离去延续"离别"母题。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c4">
+        <h3><span class="ch-num">Chapter 04</span>驴打滚儿</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>宋妈是林家奶妈，重男轻女，丢下女儿丫头子到城来给英子弟弟当奶妈、儿子小栓子留在乡下。英子从换绿盆儿、听宋妈唱童谣写起，牵挂宋妈一家。后来宋妈的侄子来访、话里有话，引她丈夫黄板儿牙来问，方知小栓子早已掉河淹死、丫头子被偷偷送给赶马车的。宋妈拉着英子跑遍哈德门马车行寻女无果，最终她决定跟丈夫回老家"算账"——"明年生了儿子再回来"。</dd>
+          <dt>人物与关系</dt>
+          <dd>英子；宋妈（善良唠叨、重男轻女、命运多舛的奶妈）；小栓子（已死的儿子）；丫头子（被送人的女儿）；黄板儿牙（赶马车的丈夫）。</dd>
+          <dt>主题作用</dt>
+          <dd>借英子的眼睛写底层女性的苦难与无奈——重男轻女的旧俗吞噬了一个母亲的儿女；"驴打滚儿"（豆面糕）与宋妈的驴，串起底层的艰辛。</dd>
+        </dl>
+      </div>
+
+      <div class="chapter" id="c5">
+        <h3><span class="ch-num">Chapter 05</span>爸爸的花儿落了，我也不再是小孩子</h3>
+        <dl>
+          <dt>关键情节</dt>
+          <dd>毕业典礼上，英子代表同学领毕业证书、致辞，襟上别着爸爸种的夹竹桃；爸爸重病不能来，英子怕、也懂——爸爸叮嘱她"无论什么困难的事，只要硬着头皮去做，就闯过去了"。回忆插叙爸爸逼她雨中上学的严厉与温情（送花夹袄、给铜子儿），以及爸爸爱花、爱朋友、热心助人的品性。毕业典礼上唱骊歌《送别》，英子领悟到做大人、怕做大人、又想永远被当孩子的矛盾。回到家，夹竹桃落了，厨子老高来报爸爸病危。英子异常镇定地接过家事重担，默念"爸爸的花儿落了，我也不再是小孩子"。</dd>
+          <dt>人物与关系</dt>
+          <dd>英子（被迫成为"小小的大人"）；爸爸（严慈并济、爱花爱朋友，肺病病逝）；妈妈（温厚）；厨子老高（传信者）。</dd>
+          <dt>主题作用</dt>
+          <dd>全书终篇，"爸爸的花儿落了"既是字面的花落（爸爸再没心思修剪花枝），又是象征性的成长仪式——父之死标志英子童年终结、长女责任提前降临，与序篇"让实际的童年过去，心灵的童年永存下来"首尾呼应。</dd>
+        </dl>
+      </div>
+
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">VI</span>金句摘录</h2>
+      <ol class="quotes">
+        <li>夏天过去，秋天过去，冬天又来了，骆驼队又来了，但是童年却一去不还。<span class="src">冬阳·童年·骆驼队</span></li>
+        <li>让实际的童年过去，心灵的童年永存下来。<span class="src">冬阳·童年·骆驼队</span></li>
+        <li>我分不清天空和大海。金红的太阳，是从蓝色的大海升上来的呢？还是从蓝色的天空升上来的呢？<span class="src">我们看海去</span></li>
+        <li>我分不出海跟天，我分不出好人跟坏人。<span class="src">我们看海去</span></li>
+        <li>我要把天和海分清楚，我要把好人和坏人分清楚，我要把疯子和贼子分清楚，但是我现在却是什么也分不清。<span class="src">我们看海去</span></li>
+        <li>英子，不要怕，无论什么困难的事，只要硬着头皮去做，就闯过去了。<span class="src">爸爸的花儿落了</span></li>
+        <li>爸爸的花儿落了，我也不再是小孩子。<span class="src">爸爸的花儿落了</span></li>
+        <li>人生难得是欢聚，惟有别离多。<span class="src">爸爸的花儿落了 · 毕业骊歌</span></li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VII</span>批判性思考与延伸</h2>
+
+      <h3>优点与局限</h3>
+      <ul class="points">
+        <li><strong>儿童视角的叙事革命</strong>：以第一人称小孩口吻叙述，成人世界的残酷被孩子天真地点破却不真正理解，形成含蓄而巨大的张力——这是本书最独特的艺术成就。</li>
+        <li><strong>温婉含蓄、不着痕迹</strong>：多用白描与京味儿口语，情景交融；结尾不写父亲之死而写"夹竹桃垂下了好几枝子"，以花落的静景收束巨痛，节制而深沉。</li>
+        <li><strong>局限</strong>：作为短篇集，各篇人物与场景相对独立，缺乏长篇的纵深；感伤怀旧的基调可能使个别篇章略显"为赋新词强说愁"；对成人世界的批判点到为止，不涉深层社会矛盾的展开。</li>
+      </ul>
+
+      <h3>适合 / 不适合的读者</h3>
+      <ul class="points">
+        <li><strong>适合</strong>：喜爱温婉叙事、童年回忆、京味风物的读者；青少年与亲子共读；对老北京民俗、海峡乡愁感兴趣者。</li>
+        <li><strong>不太适合</strong>：期待强情节、快节奏叙事的读者；偏好尖锐社会批判或复杂人物关系者。</li>
+      </ul>
+
+      <h3>互为补充 / 对照的书</h3>
+      <ul class="points">
+        <li><strong>《呼兰河传》（萧红）</strong>：同样以童年视角写北方小城的风俗与苦难，可对照看不同作家如何以童眼观世。</li>
+        <li><strong>《草房子》（曹文轩）</strong>：以儿童成长为核心的纯美小说，气质相近而更偏诗意。</li>
+        <li><strong>《我们小时候》（莫言等编）</strong>：多种童年记忆的合集，可体会同一时代不同地域的童年。</li>
+        <li><strong>林海音《窃读记》等散文</strong>：可看她散文与小说在"京味"与"温情"上的延续。</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">城南旧事</div>
+  林海音自传体童年小说集 · 读书笔记 · 生成于 2026
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
