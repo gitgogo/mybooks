@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>平凡的世界 · 读书笔记 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #9c5a2e;
+    --accent-soft: #f2e0d0;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(230,180,120,.22), transparent 60%), linear-gradient(180deg, #3a2a1a 0%, #8a5a34 100%);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: var(--hero-glow);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: .4em;
+    color: var(--hero-accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em;
+    margin: 0 0 20px;
+    line-height: 1.2;
+    color: var(--hero-text);
+  }
+  .hero .subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--hero-subtitle);
+    letter-spacing: .1em;
+    margin-bottom: 36px;
+  }
+  .hero .meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--hero-meta);
+    padding-top: 20px;
+    border-top: 1px solid var(--hero-divider);
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 48px 32px 96px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-right: 16px;
+    border-right: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block;
+    padding: 6px 0 6px 22px;
+    color: var(--text-soft);
+    text-decoration: none;
+    position: relative;
+    line-height: 1.5;
+    transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc;
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em;
+    position: relative;
+  }
+  h2::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 60px; height: 2px;
+    background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    margin-right: 14px;
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 36px 0 14px;
+    padding-left: 14px;
+    border-left: 3px solid var(--gold);
+    line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead {
+    font-size: 18.5px;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  blockquote {
+    margin: 24px 0;
+    padding: 20px 24px 20px 28px;
+    background: var(--quote-bg);
+    border-left: 3px solid var(--accent);
+    color: var(--text-soft);
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+    position: relative;
+  }
+  blockquote::before {
+    content: "\201C";
+    position: absolute;
+    top: 2px; left: 8px;
+    font-family: Georgia, serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--accent-soft);
+    pointer-events: none;
+  }
+  blockquote p { margin: 0 0 10px; position: relative; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote .src {
+    display: block;
+    font-style: normal;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    letter-spacing: .05em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: #f5f0e3;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .1em;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fbf8ef; }
+  td:first-child { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06);
+  }
+  .chapter h3 {
+    margin: 0 0 16px;
+    padding: 0 0 12px;
+    border-left: none;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px;
+    position: relative;
+    line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6";
+    position: absolute;
+    left: 4px; top: 10px;
+    color: var(--gold);
+    font-size: 10px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 12px;
+    border-radius: 999px;
+    letter-spacing: .05em;
+  }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote;
+    padding: 22px 24px 22px 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    position: relative;
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute;
+    left: 20px; top: 22px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quotes .src {
+    display: block;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    letter-spacing: .05em;
+  }
+
+  .note {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    background: #f5f1e5;
+    border-radius: 4px;
+    margin: 16px 0;
+    line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px 60px;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    letter-spacing: .1em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: ..3em;
+    margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif);
+    font-size: 3.4em;
+    float: left;
+    line-height: .9;
+    padding: 6px 10px 0 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* 人物关系图 */
+  .cast-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 32px 24px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+  }
+  .cast-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--text-soft);
+    padding: 14px 18px;
+    background: #f7f3ea;
+    border-radius: 6px;
+    margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .cast-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .cast-node {
+    flex: 0 0 auto;
+    min-width: 140px;
+    padding: 10px 14px;
+    background: #faf6ec;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .cast-name .aka {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .cast-role {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .cast-note {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .cast-connector {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: -8px 0 8px;
+  }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>平凡的世界</h1>
+  <div class="subtitle">路遥 著 · “普通人在大时代里的艰难挣扎与尊严”</div>
+  <div class="meta">
+    <span><strong>类型</strong>虚构 / 长篇现实主义巨著</span><span><strong>作者</strong>路遥</span><span><strong>出版方</strong>北京十月文艺出版社</span><span><strong>字数</strong>约 70.9 万字（正文）</span><span><strong>初版</strong>1986—1991 年 · 第三届茅盾文学奖</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物关系与命名谱系</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与核心论点</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">第一部（1975—1978）：苦难求学与爱情阻断</a></li><li><a href="#c2">第二部（1979—1982）：黄原揽工、砖厂兴衰与婚姻错位</a></li><li><a href="#c3">第三部（1983—1985）：煤矿、牺牲与回归</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">一九七五年二、三月间，一个平平常常的日子，细蒙蒙的雨丝夹着一星半点的雪花，正纷纷淋淋地向大地飘洒着。黄土高原严寒而漫长的冬天看来就要过去，但那真正温暖的春天还远远没有到来。《平凡的世界》就从这个雨雪交加的惊蛰前夜写起，以孙少安、孙少平两兄弟为中心，全景式地表现了改革开放初期（1975—1985）中国城乡各阶层在社会大变革中的挣扎与奋斗。这是一部百万字的三部曲，“以恢宏的气势和史诗般的品格”，展现了普通人在大时代里的艰难挣扎、对尊严的坚守与对命运的不屈，曾获第三届茅盾文学奖，并影响了包括马云在内的几代读者。</p>
+      <p>《平凡的世界》是路遥（1949—1992）用生命写成的百万字长篇巨著，1986 年第一部出版，1988 年完成全部并在中央人民广播电台广播，1991 年获第三届茅盾文学奖。小说以 1975 年到 1985 年十年间中国社会的巨大变迁为背景，通过孙少安、孙少平两兄弟及其家庭、朋友、城乡交叉地带的生活，全景式地表现了改革时代中国城乡的社会生活和人们思想情感的巨大变化。</p><p>全书分三部、共五十多章（第一部 1975—1978，第二部 1979—1982，第三部 1983—1985）。第一部写孙少平在原西县立中学的苦难求学、孙少安创业办砖厂的波折，以及双水村在“农业学大寨”末期的停滞；第二部写少平外出打工到铜城大牙湾煤矿、少安砖厂由兴到衰、少安与秀莲的情感与事业起伏；第三部写少平在煤矿的坚守与少安砖厂的重振、兄妹情与城乡交叉地带人物的命运归宿。小说的核心人物孙少平是有尊严、有理想的青年，孙少安是负重前行的农民创业者，田晓霞（少平的恋人、记者）与田润叶（少安的青梅、教师）则构成两条重要的情感线。</p><p>《平凡的世界》的伟大之处，在于它把“平凡”写成了史诗：孙少平在煤矿的黑暗与危险中坚持读书、坚守自我，宁可做一个掏炭的“煤黑子”也不愿回到哥哥的砖厂“安逸”地生活；孙少安在砖厂倒闭后不失时机地重新站起，体现中国农民在改革中的坚韧。路遥自己说，他写的是“像牛一样劳动，像土地一样奉献”的普通人。这部小说既是一部城乡交叉地带的奋斗史，也是一部关于尊严、理想与土地的中国当代史诗。</p><div class="note"><strong>版本与统计说明：</strong>本笔记据北京十月文艺出版社版。正文约 <strong>70.9 万字</strong>（按正文字符统计口径，含全部 164 个正文单元）。由于篇幅巨大（708k 字），本笔记采用 Agent 分布式阅读，将全书按故事阶段归并为若干“部分”来分析，而非逐章罗列；每个部分约 500 字概要，并附关键人物、情节与主题作用。</div>
+      <div class="tags">
+        <span class="tag">现实主义巨著</span><span class="tag">城乡交叉</span><span class="tag">奋斗与尊严</span><span class="tag">路遥</span><span class="tag">改革时代</span><span class="tag">茅盾文学奖</span>
+      </div>
+    </section>
+
+    <section class="cast-section" id="cast">
+  <h2><span class="num">II</span>人物关系与命名谱系</h2>
+  <div class="cast-legend">
+    <span><span class="swatch" style="background:#2d5f8a"></span>男性</span>
+    <span><span class="swatch" style="background:#a04e7a"></span>女性</span>
+    <span><span class="swatch" style="background:#b08d4f"></span>群体 / 他物</span>
+  </div>
+  <div class="cast-tree">
+    <div class="cast-gen">
+      <div class="cast-gen-label">孙家：双水村的核心家庭</div>
+      <div class="cast-row">
+        <div class="cast-node male"><div class="cast-name">孙玉厚</div><div class="cast-role">孙少安、孙少平之父 · 老实的农民，一辈子在土里刨食，是负重前行的中国父亲</div></div>
+        <div class="cast-node male"><div class="cast-name">孙少安</div><div class="cast-role">大哥 · 13 岁辍学务农，办砖厂创业，是“负重前行者”与改革初期的农民企业家</div></div>
+        <div class="cast-node male"><div class="cast-name">孙少平</div><div class="cast-role">男主 · 高中毕业后外出打工，到铜城大牙湾煤矿当挖煤工，有尊严、有理想、坚持读书的青年</div></div>
+        <div class="cast-node male"><div class="cast-name">孙兰香</div><div class="cast-role">妹妹 · 少平供她上大学，最终成为优秀的科研工作者，是孙家“知识改变命运”的化身</div></div>
+        <div class="cast-node female"><div class="cast-name">贺秀莲</div><div class="cast-role">少安之妻 · 山西姑娘，与少安同甘共苦，是少安砖厂起落的情感支撑（第三部病逝）</div></div>
+      </div>
+    </div>
+    <div class="cast-gen">
+      <div class="cast-gen-label">田家：县城的干部家庭</div>
+      <div class="cast-row">
+        <div class="cast-node male"><div class="cast-name">田福堂</div><div class="cast-role">双水村大队书记 · 精明强干又固执，在“农业学大寨”中折腾，是乡村政治的典型</div></div>
+        <div class="cast-node male"><div class="cast-name">田福军</div><div class="cast-role">田福堂之弟 · 从县到地区的干部，开明务实，是改革派的地方代表</div></div>
+        <div class="cast-node female"><div class="cast-name">田润叶</div><div class="cast-role">田福堂之女 · 少安的青梅竹马，教师，向少安表白被拒，后嫁李向前，是隐忍与善良的化身</div></div>
+        <div class="cast-node female"><div class="cast-name">田晓霞</div><div class="cast-role">田福军之女 · 少平的恋人与精神导师，省报记者，在抗洪采访中为救儿童牺牲，是理想的殉道者</div></div>
+        <div class="cast-node male"><div class="cast-name">李向前</div><div class="cast-role">润叶之夫 · 司机，因得不到润叶的爱而醉酒致残，最终以真心赢得润叶，是救赎与善良的化身</div></div>
+      </div>
+    </div>
+    <div class="cast-gen">
+      <div class="cast-gen-label">金家及其他</div>
+      <div class="cast-row">
+        <div class="cast-node male"><div class="cast-name">金波</div><div class="cast-role">少平的好友 · 帅气深情，在青海当兵时爱上一个藏族姑娘，退伍后终身未娶，是理想主义的悲歌</div></div>
+        <div class="cast-node male"><div class="cast-name">王满银</div><div class="cast-role">少平姐夫 · 不务正业的二流子，逛鬼世界的市井小人物的代表</div></div>
+        <div class="cast-node female"><div class="cast-name">孙兰花</div><div class="cast-role">少平之姐 · 嫁给二流子王满银，一生受苦却坚韧，是底层女性的命运写照</div></div>
+        <div class="cast-node male"><div class="cast-name">惠英嫂</div><div class="cast-role">煤矿工友之妻 · 少平在煤矿的关怀对象，带着孩子，是少平精神归宿的隐喻</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>命名与关系提示：</strong>双水村孙、田、金三姓是全书的支点：孙家（玉厚、少安、少平、兰香）代表农民与土地；田家（福堂、福军、润叶、晓霞）代表城乡交叉与干部阶层；金家（金波等）代表理想主义的青年。孙少平与田晓霞、孙少安与田润叶是两条平行的情感线，都以“错过”与“升华”告终——晓霞之死是全书最悲怆的理想主义挽歌。</div>
+</section>
+
+    <section id="s2">
+      <h2><span class="num">II</span>作者简介</h2>
+      <p><strong>路遥（1949—1992）</strong>，原名王卫国，1949 年 12 月 3 日生于陕西榆林市清涧县一个贫困的农民家庭，因家贫 7 岁即过继给延川县农村的伯父。他曾在延川县立中学学习，1969 年回乡务农，其间做过许多临时性工作，并在农村一小学教书一年。1973 年进入延安大学中文系学习，开始文学创作；大学毕业后任《陕西文艺》（今为《延河》）编辑。1980 年发表《惊心动魄的一幕》，获第一届全国优秀中篇小说奖；1982 年发表中篇小说《人生》，后被改编为电影，轰动全国。1988 年完成百万字的长篇巨著《平凡的世界》，这部小说以恢宏的气势和史诗般的品格，全景式地表现了改革时代中国城乡的社会生活和人们思想情感的巨大变迁，还未完成即在中央人民广播电台广播，并于 1991 年荣获第三届茅盾文学奖。</p><p>路遥为写《平凡的世界》付出了生命的代价。他把自己关在陕西铜川的煤矿写作室，几乎是“拼了性命”地写作，小说第一部发表后并不被看好，但他坚持“像牛一样劳动，像土地一样奉献”。1992 年路遥因肝病早逝，年仅 43 岁，骨灰葬于西安，碑上刻着“平凡的世界——路遥之墓”。他的英年早逝使《平凡的世界》成为一部“用生命写成”的小说，也使其“城乡交叉地带”的文学立场成为当代文学的重要遗产。</p><p>《平凡的世界》的影响绵延至今：它改变了无数青年的命运，马云曾不止一次提到《平凡的世界》对他的影响——他在高考落榜、创业受挫时靠这本书激励自己。2019 年，小说入选“新中国 70 年 70 部长篇小说典藏”；2020 年，胡赛尼·塔帕与朱一龙推荐本书入选“教育部中小学生阅读指导目录”。路遥与莫言、陈忠实、贾平凹并称“陕西文学四大家”，《平凡的世界》是其中最具人民性的作品。</p><p style="color:var(--text-muted)">（以上据本书 EPUB 所附《作者简介》及公开资料整理。）</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">III</span>全书结构与故事梗概</h2>
+      <h3>故事梗概</h3><p>《平凡的世界》是一部以孙少安、孙少平两兄弟为中心的长篇史诗。故事从 1975 年（文革末期、“农业学大寨”尾声）写起，到 1985 年（改革深入期）结束，历时十年。第一部：孙少平在原西县立中学读书，因贫困而自卑，在学校因“丙菜”（最差菜）而被同学郝红梅悄悄同情；孙少安 13 岁辍学务农，与秀莲结婚后办起砖厂，初次创业成功又因烧砖师傅的失误而倒闭。第二部：孙少平高中毕业外出打工，到黄原城揽工，在艰苦的工地上坚持读书；少安砖厂倒闭后一蹶不振，少平与少安的“分歧”（少平不愿回乡务农）成为核心矛盾；田晓霞在省报当记者，与少平在古塔山下的杜梨树下约定两年后相会。第三部：少平到铜城大牙湾煤矿当挖煤工，在黑暗与危险中坚守自我；晓霞在抗洪采访中为救儿童牺牲，少平悲恸欲绝；少安砖厂重新站起，成为“农民企业家”，并出资为村里翻修小学；少平拒绝了金秀（金波妹妹、少平的高中同学）的表白与调到省城的机会，选择回到大牙湾煤矿，回到惠英嫂身边——“他也许终将平凡，但绝不平庸”。</p><h3>核心冲突与主题</h3><ul class="points"><li><strong>土地 vs 出走</strong>：孙少安扎根土地办砖厂（负重前行），孙少平走出土地当矿工（精神出走），两种“平凡”的活法构成全书的精神张力。</li><li><strong>尊严 vs 贫困</strong>：少平在揽工时背石头磨烂脊背、在煤矿被工头欺凌，却始终守住“人活着，就要立得直”的尊严；少安在砖厂倒闭后不失时机地重新站起，是农民在改革中的坚韧。</li><li><strong>理想 vs 现实</strong>：田晓霞之死是理想主义的悲歌——她作为少平的精神导师与恋人，最终为救儿童牺牲，把少平推向更深的孤独与坚守。</li><li><strong>城乡交叉</strong>：路遥刻意描写“城乡交叉地带”——双水村与原西县、铜城大牙湾煤矿，农民与市民、土地与工业、传统与现代的交叉，构成小说独特的史诗品格。</li></ul>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">IV</span>章节分析（按故事阶段）</h2>
+      <div class="note"><strong>章节说明：</strong>本 EPUB 按原书五十余章顺序切分为 164 个正文单元（约 70.9 万字）。由于篇幅巨大，本笔记将全书按故事阶段归并为三部分来分析：第一部（约第 1—55 章，1975—1978）、第二部（约第 56—110 章，1979—1982）、第三部（约第 111—153 章，1983—1985），每部分约 500 字概要。</div>
+      <div class="chapter" id="c1">
+  <h3><span class="ch-num">Chapter 01</span>第一部（1975—1978）：苦难求学与爱情阻断</h3>
+  <dl>
+    <dt>孙少平线：县立高中的贫困与自尊</dt><dd>1975 年春，17 岁的孙少平以全班最差的主食（两个黑高粱面馍）和五分钱的丙菜开始县立高中的生活。他敏感而自尊，因贫困而“过分地自尊”，与同样贫寒的郝红梅以眼“交谈”、借书传递感情，两人因共同的寒酸而靠近。跛女子侯玉英当众揭穿他俩的“婆姨”关系，加上他与出身干部家庭的班长顾养民之间的摩擦，使这段朦胧情感无疾而终。少平在县城各处游荡、贪婪地读课外书（《钢铁是怎样炼成的》改变了他），并被田晓霞——田福军的女儿、县革委会副主任的外甥女——引入一个更辽阔的精神世界。他和田晓霞一同参加文艺宣传队、去黄原地区参加革命故事调讲并获奖，眼界为开。郝红梅转而投向顾养民，金波替少平痛打顾养民，少平从中获得“在最平常的事情中都可以显示出一个人人格的伟大”的人生认识。毕业前夕，他冒雨游洪河抢救侯玉英，以行动完成了自己的精神成长；又倾尽所有替郝红梅摆平偷手帕的丑闻，显示宽厚。家中姐夫王满银贩老鼠药被“劳教”，少平冷静地成为临时主事人。</dd>
+    <dt>孙少安线：辍学、爱情阻断与砖厂初兴</dt><dd>孙少安 13 岁高小毕业即辍学务农，供弟弟少平、妹妹兰香读书。他与村支书田福堂之女润叶青梅竹马，润叶捎信表白“我愿意一辈子和你好”，少安却以“我不能用一个公家的女教师去配一个泥腿把子”为由退缩——他看清了门第与家境的鸿沟。父亲孙玉厚为娶秀莲欠下一河滩债债；秀莲不要财礼、执意跟随少安。少安与润叶的爱情被现实阻断，两人各走各路。少安与秀莲结婚、生下儿子虎子，砖场点火开工，红火一时。但田福堂为报复少安与润叶的河湾相会，向公社举报少安扩大猪饲料地，少安在全公社批判会上“游街”，名誉扫地。少安与润叶的爱情彻底无望，少安娶了秀莲，砖场初办时靠一个河南烧砖师傅，红火了几年。</dd>
+    <dt>青春交集与精神成长</dt><dd>第一部把城乡差别与门第观念对爱情的碾压、贫困对自尊的磨砺、个人在时代洪流中的被动与主动推上台面。少平的“过分地自尊”与少安的“泥腿把子”自认，构成两兄弟面对同一道门第鸿沟的两种回应：一个出走，一个守土。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>城乡差别与门第观念对爱情的碾压；贫困对自尊的磨砺；个人在时代洪流中的被动与主动。</div>
+</div>
+<div class="chapter" id="c2">
+  <h3><span class="ch-num">Chapter 02</span>第二部（1979—1982）：黄原揽工、砖厂兴衰与婚姻错位</h3>
+  <dl>
+    <dt>孙少平线：黄原揽工与古塔山之约</dt><dd>高中毕业后少平回村当教师，兰香以全县第三名考入原西县高中。少平不甘心在双水村终老，辞职到黄原城揽工，在阳沟曹书记家落脚，背石头、爬陡坡，劳动强度“如同使苦役的牛马”。他租住破窑、坚持读报学习，在工地与田晓霞重逢——此时晓霞已是黄原师专学生。两人地位悬殊却精神契合：她给他《参考消息》、借他哲学政治经济学书籍，两人登上古塔山，在杜梨树下定下“两年以后，就在今天，这同一个时刻”再相见的约定。少平拒绝曹书记让其落户的邀请，选择留在艰苦的揽工生活中，因为他要“为一个不为人所知的地方不断头地走啊走”。</dd>
+    <dt>孙少安线：砖厂由兴到衰</dt><dd>少安与秀莲结婚、生下儿子虎子，砖场点火开工，红火一时。但田福堂为报复少安与润叶的河湾相会，向公社举报少安扩大猪饲料地，少安在全公社批判会上“游街”，名誉扫地。少安与润叶的爱情彻底无望，少安娶了秀莲，砖场初办时靠一个河南烧砖师傅，红火了几年。第二部把少安的砖厂推向由兴到衰的转折：田福堂的报复、政策的反复、烧砖技术的不过关，使少安几起几落。</dd>
+    <dt>田润叶被迫嫁李向前</dt><dd>第二部把城乡交叉地带中知识青年的精神求索、改革初期农民创业的脆弱与政策的反复、门第婚姻对个体的碾压交织在一起。润叶被迫嫁给李向前、向前在强奸未遂的崩溃后出走又落魄而归，是门第碾压的另一面；少平在黄原的揽工与古塔山之约，是出走者的精神求索。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>城乡交叉地带中知识青年的精神求索；改革初期农民创业的脆弱与政策的反复；门第婚姻对个体的碾压。</div>
+</div>
+<div class="chapter" id="c3">
+  <h3><span class="ch-num">Chapter 03</span>第三部（1983—1985）：煤矿、牺牲与回归</h3>
+  <dl>
+    <dt>孙少平线：大牙湾煤矿与晓霞之死</dt><dd>少平终于通过关系招工到铜城矿务局大牙湾煤矿，从农民变成正式工人。井下生活严酷，他以“牛马般的体力劳动”治疗精神创伤，与师傅王世才、惠英嫂、明明组成温暖的“家”。晓霞来矿上看他，两人感情 deepening；但晓霞来信提到有中央某“老”的后人高朗在追求她，少平陷入痛苦。师傅王世才为救徒弟被钢梁刺穿胸膛而死，少平担起对惠英母子的责任。约定相会之日临近，少平在报上看到晓霞在抗洪第一线为救小女孩牺牲的噩耗——他疯了一样跑到雨中，随后赶到省城见晓霞最后一面，田福军把晓霞留下的三本日记交给他。少平强忍剧痛重返黄原，在古塔山杜梨树旁、两年前的那个时刻，与“已不在人世的”晓霞完成相会，然后返回大牙湾。妹妹兰香和男友吴仲平劝他调省城，他婉拒，选择回到矿山——他要回到自己生活和工作的地方。</dd>
+    <dt>孙少安线：砖场重振与秀莲肺癌</dt><dd>少安砖场扩建后聘请的河南师傅不懂技术，烧出的砖无一合格，损失五六千元，几乎破产，还欠下万元贷款。少安在砖场废墟上坐到深夜，被父亲和秀莲寻回；一年后靠朋友胡永合帮忙贷到外县款、请回原师傅，砖场重振，还清贷款开始盈利。秀莲因劳累过度被诊断为肺癌。少安个人出资一万五千元重建双水村小学，田福堂、金俊武、金俊山等新旧人物同席，他在典礼上看见秀莲喷血倒下——“我们无比沉痛地获悉，原西县医院对秀莲的论断结果是：肺癌。”小说在巨大的悲怆与温暖中落幕。</dd>
+    <dt>平凡但不平庸的宣言</dt><dd>第三部把平凡人的尊严在苦难中的挺立、爱情与理想在生死面前的终极考验、个人奋斗与集体土地的关系推向高潮。少平拒绝调省城、回到矿山，是“平凡但不平庸”的精神宣言；少安砖场重振、回馈乡里，是“土地般的脊梁”；晓霞之死与秀莲之逝，是理想与奉献的双重悲歌。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>平凡人的尊严在苦难中的挺立；爱情与理想在生死面前的终极考验；个人奋斗与集体、土地的关系；“平凡”不等于“平庸”的精神宣言。</div>
+</div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">V</span>金句摘录</h2>
+      <ol class="quotes">
+                <li>他是一个普普通通的人，应该按照普通人的条件正正常常的生活……当然，普通并不等于庸俗。他也许一辈子就是个普通人，但他要做一个不平庸的人。<span class="src">第二部 · 少平的人生宣言</span></li>
+        <li>在最平常的事情中都可以显示出一个人格的伟大来。<span class="src">第二部 · 少平的人生认识</span></li>
+        <li>像土地一样朴素和深沉的母亲啊！想起来就让人温暖，让人鼻根发酸。<span class="src">第一部 · 第24章</span></li>
+        <li>生活总是这样，不能叫人处处都满意。但我们还要热情地活下去。<span class="src">第三部 · 关于生活</span></li>
+        <li>钱来自社会，到一定的时候，就有必要将一部分再给予社会，哪怕是无偿地奉献给社会。<span class="src">第三部 · 关于少平捐钱</span></li>
+        <li>劳动，就是懂得灵魂的歌唱——尽管那歌唱可能是无声的。<span class="src">第三部 · 关于矿工</span></li>
+        <li>人生啊，多么矛盾，又是多么神秘。<span class="src">第三部 · 关于少平与晓霞</span></li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VI</span>批判性思考与延伸</h2>
+      <h3>主题深度——把“平凡”升华为主动的精神选择</h3>
+<ul class="points">
+<li><strong>平凡 ≠ 平庸</strong>：少平拒绝调回省城、选择回到矿山，不是失败者的退守，而是清醒者对“生活意义”的回答——他要回到“双脚踩踏的土地”。路遥既赞美土地（少安式的奉献），又肯定出走（少平式的精神求索），两者在“平凡人的尊严”这一基点上达成统一。</li>
+<li><strong>城乡交叉地带</strong>：精准捕捉了 1975—1985 年中国农村青年在户口、身份、职业上的撕裂感——少平“成为正式工人”的喜悦背后，是“煤黑子”与省报记者之间几乎不可逾越的鸿沟，而晓霞的牺牲把这个无解的结构性矛盾推向了终极。</li>
+<li><strong>“土地 vs 出走”的双线张力</strong>：少安扎根土地办砖厂（负重前行），孙少平走出土地当矿工（精神出走），两种“平凡”的活法构成全书的精神张力，避免了单一视角的偏狭。</li>
+</ul>
+<h3>人物塑造</h3>
+<ul class="points">
+<li><strong>双线平衡</strong>：少安、少平双线并行，平衡了“土地”与“出走”两种生存方式。</li>
+<li><strong>女性角色的弧光与局限</strong>：田晓霞、贺秀莲、田润叶、郝红梅各有弧光，但秀莲的肺癌早逝带有明显的“道德献祭”色彩——她必须为少安的成功付出生命，这一点在当代读者看来值得商榷。</li>
+<li><strong>次要人物的漫画化</strong>：田福堂、孙玉亭、王满银虽有漫画化倾向，却有效承载了时代氛围。</li>
+</ul>
+<h3>局限</h3>
+<ul class="points">
+<li><strong>“美化苦难”倾向</strong>：路遥的苦难叙事有“美化苦难”的倾向——少平在洪水中、在井下的“苦难”常常被赋予形而上的意义，苦难本身的价值被浪漫化。</li>
+<li><strong>对政策与历史的肯定态度</strong>：对文革、包产到户、招工制度的描写基本持肯定态度，缺乏对改革代价的反思。</li>
+<li><strong>语言的说理段落</strong>：大量说理段落打断叙事节奏，路遥的“演讲式”写法在今天会显得笨拙。</li>
+</ul>
+<h3>适合 / 不适合的读者</h3>
+<ul class="points">
+<li><strong>适合</strong>：在城乡之间有过漂泊体验、对“平凡与尊严”命题有共鸣的读者；也想理解 1980 年代中国农村变革的读者。</li>
+<li><strong>不适合</strong>：追求叙事技巧、反感大段议论的读者。</li>
+</ul>
+<h3>互为补充 / 对照的书</h3>
+<ul class="points">
+<li><strong>《白鹿原》（陈忠实）</strong>：同为渭河平原的百年史诗，但《白鹿原》聚焦宗族与历史秘闻，《平凡的世界》聚焦日常奋斗与精神成长。</li>
+<li><strong>《人生》（路遥）</strong>：高加林是少平的“影子”，其悲剧在于不甘平凡；少平则给出了“平凡但不平庸”的答案。</li>
+<li><strong>《活着》（余华）</strong>：同样写苦难，余华冷峻克制，路遥热烈深情；一个让你“忍住泪”，一个让你“含泪微笑”。</li>
+<li><strong>《尘埃落定》（阿来）/《废都》（贾平凹）</strong>：可对照不同地域、不同民族对“土地与命运”的书写。</li>
+</ul>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">平凡的世界</div>
+  平凡的世界 · 读书笔记 · 生成于 2026
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>

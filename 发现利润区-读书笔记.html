@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发现利润区 · 读书笔记 · 读书笔记</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --text: #2b2b2b;
+    --text-soft: #555;
+    --text-muted: #8a8a8a;
+    --accent: #1f4e6b;
+    --accent-soft: #e0ebf2;
+    --border: #e6e2d8;
+    --quote-bg: #f7f3ea;
+    --gold: #b08d4f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    --hero-bg: radial-gradient(ellipse at top, rgba(210,180,110,.20), transparent 60%), linear-gradient(180deg, #12283a 0%, #1f4e6b 100%);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px; width: 0%;
+    background: var(--progress-gradient);
+    z-index: 100;
+    transition: width .1s ease-out;
+  }
+  .hero {
+    position: relative;
+    padding: 96px 24px 72px;
+    text-align: center;
+    background: var(--hero-bg);
+    color: var(--hero-text);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: var(--hero-glow);
+    pointer-events: none;
+  }
+  .hero .eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: .4em;
+    color: var(--hero-accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: .08em;
+    margin: 0 0 20px;
+    line-height: 1.2;
+    color: var(--hero-text);
+  }
+  .hero .subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--hero-subtitle);
+    letter-spacing: .1em;
+    margin-bottom: 36px;
+  }
+  .hero .meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--hero-meta);
+    padding-top: 20px;
+    border-top: 1px solid var(--hero-divider);
+  }
+  .hero .meta strong { color: var(--hero-accent); font-weight: 500; margin-right: 6px; }
+  .hero .meta span { white-space: nowrap; }
+
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 48px 32px 96px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; }
+    .toc { position: static !important; max-height: none !important; margin-bottom: 32px; border-right: none !important; padding-right: 0 !important; }
+  }
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-right: 16px;
+    border-right: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 13.5px;
+  }
+  .toc-title {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li { margin: 0; list-style: none; }
+  .toc a {
+    display: block;
+    padding: 6px 0 6px 22px;
+    color: var(--text-soft);
+    text-decoration: none;
+    position: relative;
+    line-height: 1.5;
+    transition: color .15s;
+  }
+  .toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    counter-increment: toc;
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    top: 8px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a.active { color: var(--accent); font-weight: 600; }
+  .toc a.active::before { color: var(--accent); }
+  .toc .toc-sub { counter-reset: none; }
+  .toc .toc-sub li { counter-increment: none; }
+  .toc .toc-sub a { padding-left: 40px; font-size: 12.5px; color: var(--text-muted); }
+  .toc .toc-sub a::before { content: "\00B7"; left: 28px; top: 5px; font-size: 16px; }
+
+  .content { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    letter-spacing: .05em;
+    position: relative;
+  }
+  h2::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -2px;
+    width: 60px; height: 2px;
+    background: var(--gold);
+  }
+  h2 .num {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    margin-right: 14px;
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 36px 0 14px;
+    padding-left: 14px;
+    border-left: 3px solid var(--gold);
+    line-height: 1.5;
+  }
+  h3 .ch-num {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .2em;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  p { margin: 0 0 16px; }
+  p.lead {
+    font-size: 18.5px;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  blockquote {
+    margin: 24px 0;
+    padding: 20px 24px 20px 28px;
+    background: var(--quote-bg);
+    border-left: 3px solid var(--accent);
+    color: var(--text-soft);
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+    position: relative;
+  }
+  blockquote::before {
+    content: "\201C";
+    position: absolute;
+    top: 2px; left: 8px;
+    font-family: Georgia, serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--accent-soft);
+    pointer-events: none;
+  }
+  blockquote p { margin: 0 0 10px; position: relative; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote .src {
+    display: block;
+    font-style: normal;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    letter-spacing: .05em;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: #f5f0e3;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .1em;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fbf8ef; }
+  td:first-child { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .chapter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.06);
+  }
+  .chapter h3 {
+    margin: 0 0 16px;
+    padding: 0 0 12px;
+    border-left: none;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 12px;
+  }
+  .chapter dl { margin: 0; }
+  .chapter dt {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .chapter dt:first-of-type { margin-top: 0; }
+  .chapter dd { margin: 0 0 4px; color: var(--text); }
+
+  ul.points { padding-left: 0; list-style: none; margin: 16px 0; }
+  ul.points li {
+    padding: 8px 0 8px 28px;
+    position: relative;
+    line-height: 1.8;
+  }
+  ul.points li::before {
+    content: "\25C6";
+    position: absolute;
+    left: 4px; top: 10px;
+    color: var(--gold);
+    font-size: 10px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 12px;
+    border-radius: 999px;
+    letter-spacing: .05em;
+  }
+
+  .quotes { counter-reset: quote; padding: 0; list-style: none; margin: 24px 0; }
+  .quotes li {
+    counter-increment: quote;
+    padding: 22px 24px 22px 64px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    position: relative;
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .quotes li::before {
+    content: counter(quote, decimal-leading-zero);
+    position: absolute;
+    left: 20px; top: 22px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .quotes .src {
+    display: block;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    letter-spacing: .05em;
+  }
+
+  .note {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 14px 18px;
+    background: #f5f1e5;
+    border-radius: 4px;
+    margin: 16px 0;
+    line-height: 1.7;
+  }
+  .note strong { color: var(--text-soft); }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px 60px;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    letter-spacing: .1em;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer .mark {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: ..3em;
+    margin-bottom: 8px;
+  }
+
+  #toTop {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  #toTop.show { opacity: 1; transform: translateY(0); }
+  #toTop:hover { filter: brightness(1.15); }
+
+  .content section:first-of-type p.lead::first-letter {
+    font-family: var(--serif);
+    font-size: 3.4em;
+    float: left;
+    line-height: .9;
+    padding: 6px 10px 0 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* 人物关系图 */
+  .cast-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 32px 24px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+  }
+  .cast-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--text-soft);
+    padding: 14px 18px;
+    background: #f7f3ea;
+    border-radius: 6px;
+    margin-bottom: 24px;
+  }
+  .cast-legend .swatch {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .cast-tree { font-family: var(--sans); font-size: 14px; }
+  .cast-gen { margin-bottom: 22px; }
+  .cast-gen-label {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .cast-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .cast-node {
+    flex: 0 0 auto;
+    min-width: 140px;
+    padding: 10px 14px;
+    background: #faf6ec;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .cast-node:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  }
+  .cast-node.female { border-left-color: #a04e7a; background: #faf0f5; }
+  .cast-node.male   { border-left-color: #2d5f8a; background: #eef4f9; }
+  .cast-node.other  { border-left-color: var(--gold); background: #faf6ec; }
+  .cast-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .cast-name .aka {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .cast-role {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .cast-note {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .cast-connector {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: -8px 0 8px;
+  }
+
+  @media print {
+    .toc, #toTop, #progress { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #fff; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="hero">
+  <div class="eyebrow">读书笔记 · Reading Notes</div>
+  <h1>发现利润区</h1>
+  <div class="subtitle">（美）亚德里安·斯莱沃斯基 等 著 · 一本把“企业设计”与“利润从哪里来”讲透的商学经典</div>
+  <div class="meta">
+    <span><strong>类型</strong>商业 / 管理（战略与商业模式）</span><span><strong>作者</strong>（美）亚德里安·斯莱沃斯基 / 大卫·莫里森 / 鲍勃·安德尔曼</span><span><strong>译者</strong>（见版权页）</span><span><strong>字数</strong>约 12.7 万字（正文）</span><span><strong>初版</strong>1996 年（中信版）</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="toc">
+    <div class="toc-title">目录 · Contents</div>
+    <ol>
+      <li><a href="#s1">整理概要</a></li>
+      <li><a href="#cast">人物关系与命名谱系</a></li>
+      <li><a href="#s2">作者简介</a></li>
+      <li><a href="#s3">全书结构与核心论点</a></li>
+      <li><a href="#s4">章节分析</a>
+        <ol class="toc-sub">
+          <li><a href="#c1">第1章 市场占有率已经过时</a></li><li><a href="#c2">第2章 以客户为中心的企业设计</a></li><li><a href="#c3">第3章 利润是如何产生的</a></li><li><a href="#c4">第4章 通用电气：为客户提供解决方案</a></li><li><a href="#c5">第5章 三位管理者的故事：中层也能重塑企业设计</a></li><li><a href="#c6">第6章 斯沃琪：产品金字塔企业设计</a></li><li><a href="#c7">第7章 可口可乐：管理价值链企业设计</a></li><li><a href="#c8">第8章 嘉信理财：配电盘企业设计</a></li><li><a href="#c9">第9章 英特尔：领先两步的速度模式</a></li><li><a href="#c10">第10章 迪士尼：利润乘数企业设计</a></li><li><a href="#c11">第11章 美国热电：分拆型企业设计</a></li><li><a href="#c12">第12章 ABB：全球专家网络企业设计</a></li><li><a href="#c13">第13章 微软：行业标准企业设计</a></li><li><a href="#c14">第14章 企业设计创新如何创造出利润区</a></li><li><a href="#c15">附录：企业设计、市场价值与利润区手册</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">金句摘录</a></li>
+      <li><a href="#s6">批判性思考与延伸</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section id="s1">
+      <h2><span class="num">I</span>整理概要</h2>
+      <p class="lead">当今企业面临的首要问题就是盈利能力。你的行业中有哪些盈利点？当前的利润区在哪里？未来会发生怎样的变化？——这是《发现利润区》开篇向每一位管理者提出的问题。所谓“利润区”，是企业可以赢利的经济活动领域；而所谓“无利润区”，则像一个黑洞，即便把资金投进去，也得不到分文回报。这本书最刺耳、也最著名的论断是：市场占有率已经过时。IBM、DEC、通用汽车、西尔斯、柯达、英特尔（存储芯片时代）……这些曾高奏凯歌的市场占有率领导者，在 20 世纪 80 年代盈利能力却普遍下滑，股市表现明显落后于标普 500。作者由此提出一个全新的战略逻辑：别再盯着市场占有率，要从“以产品为中心”转向“以客户和利润为中心”，每隔五年重新设计你的企业。</p>
+      <p>《发现利润区》是“利润区”理论的奠基之作，作者亚德里安·斯莱沃斯基（Adrian J. Slywotzky）是美世咨询（Mercer Management Consulting，现 Oliver Wyman）的合伙人，他与大卫·莫里森、鲍勃·安德尔曼共同开创了“价值迁移”与“企业设计”的研究体系。全书的核心贡献，是把“企业如何赚钱”这件看似只可意会的事，拆解成一套可分析、可传授的战略语言：企业设计四大战略要素（客户选择、价值获取、战略控制、业务范围）、22 种盈利模式、战略控制点、资产密集度，以及“利润区 / 无利润区”的价值迁移地图。</p><p>本书结构清晰：第一部分（第 1—3 章）是理论篇，提出“市场占有率已经过时”，论证“以客户为中心”和“利润是如何产生的”；第二部分（第 4—14 章）是案例篇，用通用电气、斯沃琪、可口可乐、嘉信理财、英特尔、迪士尼、美国热电、ABB、微软等十一家明星企业的真实经历，逐一演示如何创新企业设计、发现并创造利润区；第三部分是总结（第 14 章），讲企业设计创新与价值增长的关系。附录则补充了“企业设计”的战略/运营/组织因素，以及决定市场价值的四个关键因素（销售利润率、预期利润增长率、资产效率、战略控制）。</p><p>这本书的价值在于它的“可迁移性”。它提供了一套跨行业通用的分析语言——用“价值迁移”把看似无关的兴衰（瑞士制表被日本价值转移重创、IBM 创造 PC 却亏损、微软与英特尔的崛起）纳入统一逻辑；用“产品金字塔”“利润乘数”“配电盘”“标准”“解决方案”等模式，几乎预演了后来平台经济、订阅经济、解决方案经济的商业逻辑。同时它并不回避失败：新可乐、巴黎迪士尼、VisiCorp、斯沃琪电信尝试都被诚实记录，提醒读者创新者必然经历失误。</p><div class="note"><strong>版本与统计说明：</strong>本笔记据中信出版集团中文版。正文约 <strong>12.7 万字</strong>（按正文字符统计口径），含序言、14 章正文与 2 个附录。书中案例数据多截至 1996—1997 年，序言落款于 2002 年；引用时请注意其时代背景。</div>
+      <div class="tags">
+        <span class="tag">利润区</span><span class="tag">企业设计</span><span class="tag">价值迁移</span><span class="tag">盈利模式</span><span class="tag">战略控制</span><span class="tag">商业模式创新</span>
+      </div>
+    </section>
+
+    
+
+    <section id="s2">
+      <h2><span class="num">II</span>作者简介</h2>
+      <p><strong>亚德里安·斯莱沃斯基（Adrian J. Slywotzky）</strong>是本书第一作者，企业设计（Business Design）理论的提出者，长期担任美世咨询（Mercer Management Consulting，后并入 Oliver Wyman）合伙人。他开创了“价值迁移（Value Migration）”与“企业设计创新”的研究体系，是本书理论框架（客户选择、价值获取、战略控制、业务范围四大要素）的原创者。<span style="color:var(--text-muted)">（以上据本书序言及公开资料整理；三位作者的详细生平属既有知识，未实时核验。）</span></p><p><strong>大卫·莫里森（David Morrison）</strong>与<strong>鲍勃·安德尔曼（Bob Andelman）</strong>是斯莱沃斯基的长期合作者。莫里森同为美世咨询顾问，与斯莱沃斯基共同提出并完善“价值迁移”理论，著有《价值迁移》（Value Migration）等书，负责把理论转化为可操作的咨询方法与案例。安德尔曼是美世咨询高级副总裁，企业设计领域的资深实践者，主导了大量企业设计的咨询项目，为本书提供了大量来自实战的案例素材。三人合作的写作方式，使本书既有严谨的理论框架，又有扎实的实证基础。</p><p>斯莱沃斯基后来又出版了《价值迁移》《利润模式》《需求》等“利润区”系列著作，与哈佛商学院教授克莱顿·克里斯坦森的《创新者的窘境》、钱·金与勒妮·莫博涅的《蓝海战略》并列为1990—2000 年代最重要的商业战略经典。他的核心思想——“战略不是一份计划，而是一种不断重构的能力”——深刻影响了此后二十年的管理咨询与商业模式创新实践。</p>
+    </section>
+
+    <section id="s3">
+      <h2><span class="num">III</span>全书结构与核心论点</h2>
+      <h3>一、理论篇：市场占有率已经过时（第 1—3 章）</h3><p>第 1 章提出全书的当头棒喝：<strong>市场占有率已经过时</strong>。作者列举 IBM、DEC、通用汽车、福特、联合航空、美国钢铁、柯达、西尔斯、凯马特等市场占有率领导者，指出它们在 20 世纪 80 年代盈利能力普遍下降，股市表现落后于标普 500——市场占有率与盈利能力脱节，股东利益受损。由此引出“利润区”（可赢利的经济活动领域）与“无利润区”（投资回报为零的黑洞）两个核心概念。作者尖锐地指出：对市场占有率的极度追求，恰恰可能是导致无利润区蔓延的最主要原因。传统逻辑（先赢得市场占有率，利润随之而来）与创新者逻辑（先问客户最看重什么、利润从何而来，再问如何在盈利领域赢得市场占有率）形成鲜明对照。</p><p>第 2 章论证“以客户为中心”。作者澄清：以客户为中心不是市场研究或满意度调查（那是回溯式的、基于旧企业设计的评价），而是深入“客户经济系统”（客户购买、使用、处理产品所付出的金钱、时间与承受的斗争），挖掘客户的“隐性偏好”，并“掉转传统价值链的方向”——从客户需求出发，终于资产与核心竞争力。第 3 章是理论基石：利润来自“巧妙的企业设计”，关键在“价值获取”（如何让客户付钱）。全书归纳 22 种盈利模式（详解 11 种：客户解决方案、产品金字塔、多单位系统、配电盘、速度、卖座大片、利润乘数、创业者、专业化、基础产品、行业标准），并引入“战略控制点”与“资产密集度”两个概念，指出没有战略控制点的企业设计“像一艘舱底带洞的船”，很快会沉没。</p><h3>二、案例篇：创新者和他们的成功经历（第 4—14 章）</h3><p>第二部分用十一家企业的真实经历，逐一演示一种企业设计模式：</p><ul class="points"><li><strong>第 4 章 通用电气（韦尔奇）</strong>：为客户提供解决方案的企业设计。从“不做第一，就做第二”（1981—1996 年 GE 市值从 130 亿增至 1620 亿美元）、到“群策群力”、到“销售解决方案”，把产品、服务、融资组合成解决方案，通过通用电气资本捕获从产品转移到下游的巨大利润。</li><li><strong>第 5 章 三位管理者的故事</strong>：中层也能重塑企业设计。美登通信把印刷公司改造成“通信管理公司”、包装箱公司帮客户省 15% 资金锁定大客户、山德士制药设计“氯氮平”安全供药体系（每周验血、一次只供一周药量），一年内无一人因服药死亡。</li><li><strong>第 6 章 斯沃琪（尼古拉斯·哈耶克）</strong>：产品金字塔企业设计。瑞士制表被日本价值转移重创后，哈耶克用 30 美元价位在瑞士制造、零部件从 155 个减到 51 个、劳动力成本从总成本 30% 降到 10%，把斯沃琪打造成“防火墙品牌”，构建覆盖全价位的产品金字塔，并靠品牌延伸到寻呼机、手机乃至汽车。</li><li><strong>第 7 章 可口可乐（戈伊苏埃塔）</strong>：管理价值链企业设计。把装瓶商视为首要客户，用高糖玉米浓缩浆作筹码推动股权整合，成立可口可乐装瓶控股公司（CCE）既控制装瓶商又降低资产密集度，并把利润区瞄准饭店与自动售货机（每盎司 5—8 美分，远高于杂货店的 2 美分）。</li><li><strong>第 8 章 嘉信理财（施瓦布）</strong>：配电盘企业设计。1975 年 SEC 取消固定佣金后做折扣经纪，洞察投资咨询师这一“被行业蔑视”的群体，为它们提供后台清算服务，把竞争对手变成“虚拟销售人员”；1992 年推出“一源（OneSource）”配电盘，一个电话整合所有基金报告、零交易费，把成本转嫁给基金公司。</li><li><strong>第 9 章 英特尔（格鲁夫）</strong>：领先两步的速度模式企业设计。面对日本存储芯片价格战，毅然退出 DRAM 业务、裁员约 30% 转向微处理器，用“征服行动”把 486 等开发周期从 90 周缩到 44 周，并“同步开发”三代产品，1991 年推出“内置英特尔（Intel Inside）”消费者品牌计划。</li><li><strong>第 10 章 迪士尼（艾斯纳）</strong>：利润乘数企业设计。把知识产权反复变现，进军零售业、音像、收购 ABC 进入电视网、主题公园逐步提价、增加酒店和度假服务；同一角色价值倍增。</li><li><strong>第 11 章 美国热电（哈特索珀罗斯）</strong>：分拆型企业设计（创业者模式）。把最有价值的核心业务分拆上市且永不出售子公司股权，让每个附属机构独立融资、自负盈亏，把每个子公司变成小公司的创业精神与大公司的规模优势兼得。</li><li><strong>第 12 章 ABB（巴尼维克）</strong>：全球专家网络企业设计（专业化模式）。收购上千家小型专注的公司组成约 1000 家公司、5000 个利润中心的网络，让每个成员只做最擅长的业务，其余从网络内购买，借 ABB 品牌和全球网络远销。</li><li><strong>第 13 章 微软（比尔·盖茨）</strong>：以标准为基础的企业设计（基础产品模式）。赢 DOS 靠 1980 年 IBM PC 订单（买下 Q-DOS 改名 MS-DOS，软件与硬件分离，说服 IBM 允许第三方许可）；赢 Windows 靠先发制人的心理战与 OEM 预装+应用生态；赢浏览器战靠捆绑 IE 进 Windows 95。作者强调：最有价值也最难创造的企业设计是以标准为基础的设计，战略控制蕴藏在企业设计中，而不是技术创新中。</li><li><strong>第 14 章 企业设计创新如何创造出利润区</strong>：综合篇。创新企业与标普 500 及 80 年代市场占有率领导者对比，结论是有效的企业设计创新回报惊人。作者提出“提高利润空间的悖论”：创新者靠提高重复性收入（资产管理费、长期维护、服务合同、升级收入）的比重，实现利润不降反升；但创新必然伴随重大失误，失误分两类——新思想失败，与“目标锁定”（死守旧指标、旧企业设计）。</li></ul><h3>三、附录：企业设计与市场价值</h3><p>附录 1《企业设计》系统梳理企业设计的战略、运营与组织因素，用“传统公司 A vs 创新公司 B”的对比，说明企业设计是选定而非给定的。附录 2《企业设计和市场价值》提出决定市场价值的四个关键因素——销售利润率、预期利润增长率、资产效率、战略控制，并用钢铁、航空、软件、微处理器等行业的价值表加以验证。</p>
+    </section>
+
+    <section id="s4">
+      <h2><span class="num">IV</span>章节分析</h2>
+      <div class="note"><strong>章节说明：</strong>本 EPUB 原始正文约 12.7 万字（按正文字符统计口径）。下文章节分析按全书结构组织：第 1—3 章为理论篇，第 4—14 章为案例篇（每章一家创新企业），第 15 章为综合与“利润区手册”，附录补充企业设计与市场价值的四要素。</div>
+      <div class="chapter" id="c1">
+  <h3><span class="ch-num">Chapter 01</span>第1章 市场占有率已经过时</h3>
+  <dl>
+    <dt>利润区与无利润区</dt><dd>本书开宗明义：当今企业面临的首要问题是盈利能力。作者先追问一个看似简单的问题——你知道哪10家企业最赢利吗？为什么它们的利润如此高，其获得盈利的原因都一样吗？然后给出全书最著名的论断：市场占有率已经过时。作者列举了IBM、美国数字设备公司（DEC）、通用汽车（GM）、福特、联合航空、美国钢铁、柯达、西尔斯、凯马特等一长串市场占有率领导者，它们都保持着领先的市场占有率、在行业内数一数二，但20世纪80年代盈利能力均出现下降，1985—1995年股市表现明显低于标普500。市场占有率使这些企业无利可图、停滞不前。</dd>
+    <dt>数量增长 vs 价值增长</dt><dd>在无利润区不断扩大的新经济秩序里，旧秩序中最有价值的两大理念——市场占有率和数量增长，俨然成了洪水猛兽。作者提出“数量增长”与“价值增长”的区分：传统派认为先赢占有率、利润随之而来；创新者则先问“客户最看重什么、利润从何而来、如何在盈利领域赢取占有率”。快速增长的行业（个人电脑、消费电子、电信、软件）里涌现了大量最终无利可图的公司，而零增长或低速增长的行业里却诞生了最成功的企业——可口可乐在低速增长的饮料行业实现巨大利润增长，通用电气、斯沃琪在低速增长行业始终保持高利润。</dd>
+    <dt>错误的企业设计下的增长陷阱</dt><dd>无利润区是所有企业的黑洞：自然界的黑洞吸入光线便杳无无踪，经济体的黑洞即便投进资金也得不到分文回报。无利润区有多种形态：可以是一段价值链（如计算机分销）、一种客户细分、整个行业（如环境整治）、单个客户（如沃尔玛这样的巨头买家）、或一整套企业设计（如辐射状航空企业设计、集成化钢铁厂）。作者讽刺地指出：对市场占有率的极度追求可能正是导致无利润区蔓延的最主要原因——假如一个行业有10家竞争者，把5年内的目标市场占有率相加，总数会超过原市场占有率的150%—170%，这显然不可能，但身边的行业和公司正在这样做。盲目追求市场占有率往往以牺牲企业设计创新为代价，在错误的企业设计下获得高市场占有率，往往预示着灾难而非福音。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>市场占有率≠盈利能力；利润区会随客户偏好变化而转移，企业必须以客户和利润为中心重构企业设计。</div>
+</div>
+<div class="chapter" id="c2">
+  <h3><span class="ch-num">Chapter 02</span>第2章 以客户为中心的企业设计</h3>
+  <dl>
+    <dt>客户经济系统：挖掘隐性偏好</dt><dd>在以产品为中心的时代，市场占有率是指路明灯，企业关注改进产品、打造规模经济。但新秩序要求企业从“以产品为中心”转向“以客户为中心”。作者澄清：以客户为中心不是传统市场研究，也不是客户满意度调查——后者是回溯式的、基于旧企业设计的评价。真正的以客户为中心，要求企业深入“客户经济系统”：客户购买、使用、处理产品所付出的金钱、时间与承受的斗争，产生出“产品”这一“小盒子”，企业要挖掘客户的“隐性偏好”。</dd>
+    <dt>掉转传统价值链的方向</dt><dd>作者建议管理者把大量时间从“行业内”转向“行业外”的客户，尤其要接触最苛刻、最有洞察力的客户。传统价值链从企业资产出发、终于客户；客户导向的价值链则从客户需求出发、终于资产与核心竞争力——必须掉转这个方向。福特T型车与斯隆金字塔车系的兴衰、莲花公司随客户偏好从“单一软件”转向“成套软件”再转向“网络通信”而不断重塑企业设计的案例，印证了以客户为中心的价值。</dd>
+    <dt>客户偏好是预测未来的关键</dt><dd>最关键的一条是：“了解客户需求的变化并不是最重要的，最重要的是了解客户未来的偏好。”因为在新经济秩序中，客户和利润区总在发生变化，企业必须超越以产品为中心的思维，转向以客户为中心的思维——市场占有率的理念必须服从于以利润为中心的思想。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>以客户为中心不是问卷调查，而是深入客户经济系统、挖掘隐性偏好、掉转价值链方向，并预测客户未来的偏好。</div>
+</div>
+<div class="chapter" id="c3">
+  <h3><span class="ch-num">Chapter 03</span>第3章 利润是如何产生的</h3>
+  <dl>
+    <dt>22种盈利模式：详解11种</dt><dd>本章是全书理论基石。作者指出：利润来自“巧妙的企业设计”，而其中的关键是“价值获取”（如何让客户付钱）。全书归纳至少22种盈利模式，详解其中11种：①客户开发/客户解决方案模式（FactSet 先期投资了解客户、调整产品融入客户经营体系）；②产品金字塔模式（塔基低价大量防火墙品牌保护塔顶高利润，如美泰的芭比、SMH 的斯沃琪）；③多单位系统模式；④配电盘模式；⑤速度模式；⑥卖座大片模式；⑦利润乘数模式；⑧创业者模式；⑨专业化模式；⑩基础产品模式；⑪行业标准模式。</dd>
+    <dt>战略控制点与资产密集度</dt><dd>作者强调“组织文化/盈利心理学”对利润的影响（节俭与铺张可让利润率相差2—3个百分点），并引入“资产密集度”与“战略控制点”两个概念。没有战略控制点的企业设计“像一艘舱底带洞的船，会很快沉没”。战略控制点包括品牌、专利、成本优势、价值链控制、行业标准等10种以上。</dd>
+    <dt>企业设计四要素</dt><dd>最后作者给出决定市场价值的四要素：销售利润率、预期利润增长率、资产效率、战略控制。并以可口可乐、宝洁、全美航空的对比说明企业设计如何转化为投资者估值（市销率从0.3到7.0不等）。企业设计四大战略要素——客户选择、价值获取、战略控制、业务范围——必须互相促进，构成一个内部协调的整体。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>利润的产生有22种机制，核心在于企业设计的价值获取；企业必须主动选择盈利模式、控制资产密集度、构建战略控制点。</div>
+</div>
+<div class="chapter" id="c4">
+  <h3><span class="ch-num">Chapter 04</span>第4章 通用电气：为客户提供解决方案</h3>
+  <dl>
+    <dt>“不做第一，就做第二”：聚焦领先领域</dt><dd>本章以“一家中等公司花50万美元向通用电气购买电脑”的故事开场：客户买的不仅是电脑，还有自选配置、服务、融资和全年不间断运行的电子支持系统。韦尔奇在1981—1996年间三次修订 GE 的企业设计。第一次“不做第一，就做第二”（只在业内领先的领域投资，否则退出，把弱势业务变现再投入），使 GE 市值从1981年的130亿美元增至1996年底的1620亿美元。</dd>
+    <dt>群策群力：剔除官僚环节</dt><dd>第二次“群策群力”（剔除工作流程中的官僚环节，把命令控制转变为员工参与），使 GE 年均生产率从80年代的2%提升到1987—1991年的4%以上。第三次“销售解决方案”（总裁营销模式），韦尔奇亲自面向企业高层，把产品置于客户整体经济体系中，与福特等客户建立业务伙伴关系。</dd>
+    <dt>销售解决方案与金融服务延伸</dt><dd>作者特别强调 GE 通过通用电气资本（1986年后加里·温特领导，1995年资产达1860亿、成美国第三大银行）向金融服务与下游服务延伸：售后服务贡献了30%以上的利润率，售后与融资业务贡献了整体运营收入的40%，金融服务部门年均净收入增长18%（其他业务仅4%）。GE 还向知识型公司转型，通过克罗顿维尔商学院传播创新理念。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>韦尔奇证明企业可通过“不做第一就做第二—群策群力—销售解决方案”的三级企业设计跃迁，把产品、服务、融资组合成解决方案，捕获价值从产品转移到下游的巨大利润。</div>
+</div>
+<div class="chapter" id="c5">
+  <h3><span class="ch-num">Chapter 05</span>第5章 三位管理者的故事：中层也能重塑企业设计</h3>
+  <dl>
+    <dt>美登通信：从印刷到通信管理</dt><dd>本章论证企业设计创新不只属于 CEO，小公司、分公司和中层管理者同样能进入利润区。案例一：美登通信公司（Madden Communications），总裁吉姆·多纳休在送10万套促销材料给客户（一家食品制造商，每套6美元）后，发现材料根本没进过任何一家食品店——客户数据库只有2.5万家支持店却订了10万套，每家店堆4套。多纳休据此重写报告，主动提供“按需印刷+直接面向商店配送+组装+数据库管理”的综合服务，把印刷公司改造成通信管理公司，并把销售薪酬从佣金制改为工资制、把自己变成“客户业务专家”。营收从1980年的500万美元增至1997年的1.2亿美元。</dd>
+    <dt>包装箱公司：帮客户省15%资金</dt><dd>案例二：包装箱公司，业务开发经理吉姆·伯顿（化名）通过观察发现客户工厂包装流程混乱，主动提出签5年期固定价格供应合同并租用仓库，帮客户省15%资金、清理空间，从而锁定大客户；进而与客户产品开发部门合作，以1.2倍成本造出寿命延长一倍的箱子。案例三：山德士制药产品经理卡丽·史密斯·考克斯负责的“氯氮平”（抗精神分裂症药，每1000名患者有10人出现致命白细胞减少）面临两难，她没有改药或放弃，而是设计出“每周验血、一次只供一周药量、不检测不供药”的安全供药体系（组建家庭医疗公司、国家实验室、数据库公司），结果一年内无一人因服药死亡，患者恢复正常生活，公司销量大增。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>以客户和利润为中心的企业设计原则适用于任何层级；中层管理者只要深入客户经济系统、为客户创造价值，就能把以产品为中心的业务重塑为解决方案。</div>
+</div>
+<div class="chapter" id="c6">
+  <h3><span class="ch-num">Chapter 06</span>第6章 斯沃琪：产品金字塔企业设计</h3>
+  <dl>
+    <dt>瑞士制表被日本价值转移重创</dt><dd>本章讲瑞士制表业被日本（西铁城、精工、卡西欧）价值转移重创的教训，以及哈耶克如何复兴 SMH。1970 年瑞士制表业价值100亿美元，到80年代初大部分价值转移到日本设计的新企业设计中，工人从9万锐减至3万。哈耶克受托调研时发现：所谓“工资是问题”是伪命题——他做的市场测试（同款手表分别标“瑞士制造/日本制造/香港制造”，售价110/100/90美元）显示，即使在99%消费者认“瑞士制造”的意大利，瑞士手表即便零工资也有市场；真正的问题是管理、创新、营销和生产。</dd>
+    <dt>哈耶克的挑战：在瑞士以30美元卖表</dt><dd>1983年他发起挑战：“以30美元价格在瑞士出售手表，且坚持在瑞士制造”，把零部件从155个减到51个，用自动化装配线把劳动力成本从总成本30%降到10%，返修率低于1%。1983—1992年售出1亿块，1996年再售1亿块。哈耶克借鉴斯隆在通用的“产品金字塔/生日蛋糕”结构（底层约100瑞士法郎、中层约1000、顶层高达百万法郎），把斯沃契定为低端“防火墙品牌”保护整个金字塔的利润，用收购（1992年宝珀）、授权（1997年卡文克莱）维护高端。</dd>
+    <dt>防火墙品牌与品牌延伸</dt><dd>他还用巨型手表悬挂在法兰克福银行大楼、东京银座等“宣传造势”，把斯沃琪打造成流行文化，并借1996年奥运会（斯沃琪计时、火炬手、艾罗尼金属表系列）强化品牌，进而把品牌延伸到寻呼机、手机乃至与戴姆勒-奔驰合作的斯沃琪汽车。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>价值转移的关键不在技术而在企业设计；哈耶克用“情感+低成本”的斯沃琪在低端筑起防火墙品牌，构建覆盖全价位的产品金字塔，使 SMH 重新占据利润区。</div>
+</div>
+<div class="chapter" id="c7">
+  <h3><span class="ch-num">Chapter 07</span>第7章 可口可乐：管理价值链企业设计</h3>
+  <dl>
+    <dt>装瓶商：可口可乐的首要客户</dt><dd>本章讲可口可乐如何靠“管理价值链”从装瓶商的特许经营模式转型为价值链管理者。80年代早期，由于超市连锁店兴起而各地装瓶商各自为政、难以统一降价，百事可乐凭归公司所有的装瓶商网络和更聚焦大客户的策略抢占了市场。戈伊苏埃塔把装瓶商视为首要客户（而非消费者），用高糖玉米浓缩浆（HFCS）省下20%成本作筹码，推动修改“固定价格”永久合同、增持并收购装瓶商股权。</dd>
+    <dt>CCE：既控制又降资产密集度</dt><dd>为避免提高资产密集度拖累股东回报，1986年他成立可口可乐装瓶控股公司（CCE），随即把51%股份推向市场（可口可乐保留49%控制权但并表剥离），既控制装瓶商又降低资产密集度、募得11亿美元。他还发现真正的利润区在饭店和自动售货机（每盎司5—8美分，远高于杂货店的2美分），据此调整全球分销策略。</dd>
+    <dt>利润区在饭店与自动售货机</dt><dd>1994年，可口可乐202天内在7国（波兰、印度、俄罗斯、南非、越南等）新开或重开工厂；1995年全球软饮料市占46%（百事21%），运营利润40亿美元（其中国际市场占80%），市值超1500亿美元。作者还提到戈伊苏埃塔的其他赌博：1982年收购哥伦比亚影业（后高价卖出）、1982年推“健怡可乐”成功、“新可乐”失败（反而震动了公司文化，使其领悟到消费者捍卫的是可口可乐的“正宗性”而非口味）。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>利润区可能存在于你无法控制的那段价值链中；戈伊苏埃塔通过整合装瓶商、聚焦高利润渠道、用金融设计（CCE）控制资产密集度，把可口可乐从原浆制造商转型为价值链管理者。</div>
+</div>
+<div class="chapter" id="c8">
+  <h3><span class="ch-num">Chapter 08</span>第8章 嘉信理财：配电盘企业设计</h3>
+  <dl>
+    <dt>折扣经纪与“增值折扣”</dt><dd>本章讲施瓦布如何把折扣经纪做成“配电盘”（在买卖双方之间架一个降低交易成本的中枢）。1975年 SEC 取消固定佣金后，施瓦布创立第一指标公司做折扣经纪，靠“增值折扣”（把利润再投入分支网络、用200万美元买计算机、付工资而非佣金、只收交易费不收咨询溢价）脱颖而出。他洞察到投资咨询师这一“被行业蔑视”的群体其实是通向投资者的桥梁，遂为它们提供后台清算服务（嘉信理财机构投资项目），把竞争对手变成“虚拟销售人员”，卡布里克等咨询师因此裁掉一半人手、管理资产增长20倍。</dd>
+    <dt>把投资咨询师变成虚拟销售</dt><dd>随着共同基金爆炸（投资者资产从1980年1350亿增至1991年1.396万亿），他发现投资者跨基金转账要打16个电话、耗时7—10天，遂于1992年推出“一源（OneSource）”配电盘：一个电话整合所有基金报告、零交易费，把成本转嫁给基金公司（客户0费用、嘉信收基金公司小额佣金、基金公司低成本获客）。1992年营收7.5亿美元、利润8100万，1994年营收10.7亿、15%收入来自基金服务。此后他又推电话经纪、语音经纪、智能街（1993）、电子业务（1995，每笔29.95美元），1996年成管理资产第四大经纪公司。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>当多个买家与多个卖家都要承担高交易成本时，就存在高利润的中介机会；施瓦布用“配电盘”一源系统把交易和建议分离、把竞争者为客户，创造了自我壮大的高利润平台。</div>
+</div>
+<div class="chapter" id="c9">
+  <h3><span class="ch-num">Chapter 09</span>第9章 英特尔：领先两步的速度模式</h3>
+  <dl>
+    <dt>退出 DRAM：壮士断腕</dt><dd>本章讲英特尔如何用“速度”保持领先竞争对手两步。英特尔与摩托罗拉在微处理器市场平分秋色（1978年摩托罗拉68000销售额几乎是英特尔8086的两倍），但1984年英特尔8086销售额已达摩托罗拉68000的9倍。格鲁夫的武器是“征服行动”：定下两年内实现500项新设计采用的目标（而非50或200），靠“英特尔递送”式的客户解决方案（现场技术支持、培训、兼容性手册、扩展产品线）把产品变成无处不在的大众产品，并争取到 IBM 采用8088。</dd>
+    <dt>征服行动与速度</dt><dd>面对日本存储芯片的价格战，格鲁夫和穆尔毅然退出高资本密集、已沦为无利润区的 DRAM 业务，裁员约30%，All-in 转向微处理器。他用“停止许可生产、快速换代”创造独特性与速度：1984—1988年在计算机辅助设计上投入2.5亿美元（占研发20%），1985—1989年把许多芯片开发周期从90周缩到44周（486比386晶体管多4倍、成本贵2.5倍却开发更快），并“同步开发”三代产品。他还向价值链下游延伸制造芯片组和主板，把 PC 组装市场商品化以抓住战略控制点；1991年推出“内置英特尔（Intel Inside）”消费者品牌计划（投资3亿多美元），把消费者的忠诚从 PC 厂商转移到处理器，惹怒康柏却遏制了其对芯片的选择权。到 1995 年英特尔已把 AMD 远远甩在身后。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>在快速创新的行业里，利润属于能比紧随者领先两年的企业；格鲁夫用客户解决方案+退出无利润区+速度（缩短开发周期、同步开发）+控制价值链+建立消费品牌，让英特尔始终领先对手两步、稳坐利润区。</div>
+</div>
+<div class="chapter" id="c10">
+  <h3><span class="ch-num">Chapter 10</span>第10章 迪士尼：利润乘数企业设计</h3>
+  <dl>
+    <dt>卖座大片模式与录像带</dt><dd>本章讲艾斯纳如何用“利润乘数”把知识产权反复变现。1984年他接手时迪士尼电影（管理费用占收入35%，行业仅20%）、主题公园都价值外流。他先重振基础：组建精英团队、推行“周六不来就别盼周日上班”的投入文化、用“机会主义式购买”（签处于事业低谷的演员如贝特·米德勒）和严格的成本控制把电影做成赢利模式——改革后15部片有14部盈利。</dd>
+    <dt>利润乘数：知识产权反复变现</dt><dd>再升级为“卖座大片”模式：用《三个奶爸一个娃》《早安越南》精心营销和首映造势（卡森伯格甚至为破400万票房而跳舞），并靠录像带（《睡美人》动画套装售500万套）、再发行经典（《白雪公主》等）、重组动画部门（《谁陷害了兔子罗杰》全球票房超3亿，催生《小美人鱼》《狮子王》等卖座大片机器）。艾斯纳的关键创新是“利润乘数”：进军零售业（迪士尼商店开业首年每平方英尺1000美元，业内领先零售商的2—3倍）、扩建音像（博伟）、收购 ABC（进入1亿家庭用户的电视网）、主题公园逐步提价（门票从18美元经1985年19.5、21美元涨到1988年28美元，年均涨不超10%，年营业利润增3.1亿美元）、增加酒店（客房增4倍、入住率90%）和度假服务。</dd>
+    <dt>主题公园、酒店、电视网</dt><dd>作者用安德森一家两次迪士尼度假（第一次迪士尼只拿到旅行支出的不到20%，第二次拿到约75%）说明“占有消费者支出份额”的逻辑。失败案例包括《木偶奇遇记》录像带首战失利和巴黎迪士尼乐园的灾难。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>知识产权可多次变现；艾斯纳把迪士尼从产品创造者升级为产品创造者兼分销商，用电影、录像带、零售、主题公园、酒店、电视网互相促进的利润乘数体系，让同一角色价值倍增。</div>
+</div>
+<div class="chapter" id="c11">
+  <h3><span class="ch-num">Chapter 11</span>第11章 美国热电：分拆型企业设计</h3>
+  <dl>
+    <dt>分拆核心而非外围</dt><dd>本章讲哈特索珀罗斯如何用“分拆”激活创业者模式。1955年他与朋友靠凑到的5万美元创业，做热力转换器；他早期为 NASA 做太空计划产品，1970年《空气净化法》催生机遇——他向福特承诺3个月内造出氮氧化物检测仪（贝克曼说需2年），结果90天交付，被 EPA 定为行业标准。到 1982 年，政府环保支出下滑、公司市值从 1.8 亿跌到 6000 万、期权激励失效、融资成本高企，迫使变革。</dd>
+    <dt>独立融资、自负盈亏</dt><dd>他的“分拆”与常见的分拆出售外围业务相反：先把最有价值的核心业务（能源保护等）分拆上市，且永不出售子公司股权，让每个附属机构独立融资、自负盈亏、直接对客户和股东负责（管理者持股，形成“向上的动力”）。新客户群还包括投资者和创业者——研发中心变成“新业务的孵化器”。到 1995 年市值约 80 亿美元（1993—1996 年市值近增 2 倍），销售额达 29 亿美元，热仪器系统公司成 120 亿美元分析仪器市场第一（击败惠普、珀金埃尔默）。他靠热力学院凝聚分拆公司，集约化人力资源、公关、法律、税务等后台。子公司如热激光公司（柔光技术用于整容、外科医生激光网络）成为明星。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>大公司会陷入“规模不经济”，削弱与客户的联系；哈特索珀罗斯用“分拆成准独立、自负盈亏、对股东负责的单元”，把每个子公司变成小公司的创业精神与大公司的规模优势兼得。</div>
+</div>
+<div class="chapter" id="c12">
+  <h3><span class="ch-num">Chapter 12</span>第12章 ABB：全球专家网络企业设计</h3>
+  <dl>
+    <dt>收购上千家专注的小公司</dt><dd>本章讲巴尼维克如何把欧洲停滞的电力装备制造业重组为“全球专家网络”。1980年代初中电力工业停滞，各地设备公司陷入“多面手”陷阱——什么都想做、什么都做不好、靠降价换微利，越投入越无利润。巴尼维克（先任 ASEA CEO，后与布朗勃法瑞合并成 ABB）的解决方案是：收购上千家小型、专注的公司，组成约 1000 家公司、5000 个利润中心的网络，让每个成员只做最擅长的专业化业务，其余从网络内购买。结果：GMI 专注做 40% 的盈利产品（砍掉约 60% 不赢利产品），采购/研发/全球分销成本大降（原材料采购降 15%—20% 以上），借助 ABB 品牌和全球网络远销亚非美拉，并吸引回人才。</dd>
+    <dt>1000家公司、5000个利润中心</dt><dd>巴尼维克还以“时间第一要素”（“6个月能完成的在 6 周内更好完成”）推动快速并购；并新增价值获取机制——金融服务（1983 年设融资部门，为缺钱客户提供融资，对抗 BHEL）、价值共享合同（如 ABB—福特奥克维尔喷涂项目：低价+分享成本降低与设计协同带来的新增价值）、整体解决方案（先签合同再找网络内外资源，如哥伦比亚 4.3 亿美元火电厂把 40% 工程交给网络外伙伴）。他强调每年与 100 多位客户直接沟通（“不了解信息就经营企业，等于夜间关灯开车”），本地优势与全球优势并用。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>当行业由大量雷同的小企业构成、靠专业化才能获利时，“全球专家网络”能把本地关系与全球成本/研发/品牌结合；巴尼维克用专业化、金融、价值共享和整体解决方案，把分散的无利润装备厂变成高利润网络。</div>
+</div>
+<div class="chapter" id="c13">
+  <h3><span class="ch-num">Chapter 13</span>第13章 微软：行业标准企业设计</h3>
+  <dl>
+    <dt>先拿到客户，再提供技术</dt><dd>本章讲盖茨如何用“以标准为基础的企业设计”赢下三次标准之战。作者先论证：只创建标准不等于获利（IBM 创造 PC 却亏损、松下 VHS 败给索尼 Betamax 却无长期价值、贺氏调制解调器虽“兼容”却陷财务危机），关键在于围绕标准做出正确的客户选择、价值获取、差异化和业务范围。</dd>
+    <dt>赢 DOS：买下 Q-DOS 改 MS-DOS</dt><dd>盖茨的方法是“先拿到客户，再提供技术”：从牛郎星电脑的 BASIC 起步，他把业务限定为“改编而非创造”，并吸取被大客户 MITS 控制的教训，转向跨平台战略——与 48 家 OEM 签 BASIC，按固定费用卖、鼓励每台电脑预装，让语言无处不在，1978 年收入增超 600%。赢 DOS 靠 1980 年 IBM PC 订单：基尔代尔拒 IBM，盖茨买下 Q-DOS 改名为 MS-DOS，把软件与硬件分离、说服 IBM 允许第三方许可，1982 年已与 20 家 OEM（含康柏、戴尔、8 家日本公司）合作，到 1991 年营收 2 亿、毛利率 80%。赢 Windows 靠 1982 年会展看到 VisiOn 后先发制人的心理战（拉斯维加斯机场旗帜、出租车广告制造“请关注 Windows”的预期），再于 1990 年 Windows 3.0 上市，用 OEM 预装+简单操作+Excel/Word/PowerPoint 等应用生态（1989 年兼容软件不足 1000 款，1996 年超 3 万款）击败 VisiOn。此后他用同一模式做桌面办公（70 亿市场中拿走 60 亿、应用市占 85%）、Windows NT（击败 Novell Netware）、浏览器战（捆绑 IE 进 Windows 95，把网景从 80% 份额打到 70% 以下、自己从不足 10% 升到 28%）。他靠低价先占市场、锁定地位后提价，享受规模收益递增；而苹果因封闭专有、试图独占所有关键环节而失败。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>最有价值也最难创造的企业设计是以标准为基础的设计；盖茨靠“先低价拿客户、锁定行业标准、消除转换成本、构建应用生态、地位确立后提价”，把标准变成利润引擎，其创新是企业设计创新而非技术创新。</div>
+</div>
+<div class="chapter" id="c14">
+  <h3><span class="ch-num">Chapter 14</span>第14章 企业设计创新如何创造出利润区</h3>
+  <dl>
+    <dt>同一因果机制：设计→财务→估值</dt><dd>本章是综合与升华。作者指出九大创新企业的成功背后是同一因果机制：企业设计创新→财务绩效改善→估值提升→长期价值增长（如可口可乐市值/销售额比从 1980 年 0.7 升到 1996 年 7.0）。他把创新企业与标普 500 及 80 年代市场占有率领导者对比（不算微软和英特尔，创新企业年均复合增长约 20%），结论是有效的企业设计创新回报惊人。</dd>
+    <dt>提高利润空间的悖论</dt><dd>作者提出“提高利润空间的悖论”：经典理论认为利润随竞争下降，但创新者靠提高重复性收入（资产管理费、长期维护、服务合同、升级收入）的比重，实现利润不降反升。他提醒创新必然伴随“重大错误”——基德皮博迪（GE 旗下）、有缺陷的奔腾处理器、新可乐、嘉信投资咨询师系统运营梦魇、微软每种产品的 1.0 版、斯沃琪电信尝试、巴黎迪士尼乐园等，“没有大失误就不会有大创造”。失误分两类：新思想失败，与“目标锁定”（target fixation）——死守旧指标、旧企业设计而不变革，如同轰炸机飞行员只盯目标忘记高度。作者认为，创新者憎恶不必要的风险、不愿重蹈 10 年脱轨，因此他们总在思考下一次转变会是什么。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>长期价值增长需要每 5 年调整企业设计；创新者靠提高重复性收入实现利润不降反升的悖论，但必须既容忍新尝试的大失误，又避免死守旧指标的“目标锁定”陷阱。</div>
+</div>
+<div class="chapter" id="c15">
+  <h3><span class="ch-num">Chapter 15</span>附录：企业设计、市场价值与利润区手册</h3>
+  <dl>
+    <dt>企业设计的战略/运营/组织因素</dt><dd>附录 1《企业设计》系统梳理企业设计的战略、运营与组织因素，用“传统公司 A vs 创新公司 B”的对比说明企业设计是选定而非给定的样板。附录 2《企业设计和市场价值》提出决定市场价值的四个关键因素——销售利润率、预期利润增长率、资产效率、战略控制，并用钢铁、航空、软件、微处理器等行业的价值表加以验证。</dd>
+    <dt>决定市场价值的四要素</dt><dd>第 15 章作为“利润区手册”收尾，把全书思想转化为可操作的自我诊断工具。作者要求读者花几个小时静静思考，依次处理 12 个问题：我的客户是哪些人？客户的偏好如何变化？哪些人应当是我的客户？如何为客户增加价值？如何才能成为客户的首选？盈利模式是什么？目前的企业设计是怎样的？真正的竞争对手是谁？最难对付的竞争对手的企业设计是什么样的？下一个企业设计是什么样的？（后续还有战略控制、业务范围、盈利模式组合等问题）。</dd>
+  </dl>
+  <div class="highlight"><strong>核心观点：</strong>附录把“企业设计”与“市场价值”打通，并用“利润区手册”的 12 问，把抽象战略转化为可操作的自我诊断工具。</div>
+</div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="num">V</span>金句摘录</h2>
+      <ol class="quotes">
+                <li>市场占有率已经过时。<span class="src">第1章 · 市场占有率已经过时（全书的当头棒喝）</span></li>
+        <li>无利润区是所有企业的黑洞。在自然界的黑洞中，光线被吸入后便杳无踪迹；在经济体的黑洞中，即便将资金投进去，也得不到分文回报。<span class="src">第1章 · 市场占有率已经过时</span></li>
+        <li>没有战略控制点的企业设计就像一艘舱底带洞的船，会很快沉没。<span class="src">第3章 · 利润是如何产生的（并见第7章引用）</span></li>
+        <li>战略控制蕴藏在企业设计中，而不是技术创新中。<span class="src">第13章 · 微软：行业标准企业设计（论微软）</span></li>
+        <li>工资不是问题，真正的问题是管理、创新、营销和生产。<span class="src">第6章 · 斯沃琪（哈耶克论瑞士制表困境）</span></li>
+        <li>了解客户需求的变化并不是最重要的，最重要的是了解客户未来的偏好。<span class="src">第2章 · 以客户为中心的企业设计</span></li>
+        <li>没有大失误就不会有大创造，创新者经历的失败要比普通人多得多。<span class="src">第14章 · 企业设计创新如何创造出利润区</span></li>
+        <li>我们得拿到生意、拿到生意、拿到生意。<span class="src">第13章 · 微软（盖茨的低价渗透名言）</span></li>
+      </ol>
+    </section>
+
+    <section id="s6">
+      <h2><span class="num">VI</span>批判性思考与延伸</h2>
+      <h3>优点</h3>
+<ul class="points">
+<li><strong>框架系统、可迁移性强</strong>。“企业设计四要素 + 盈利模式 + 战略控制点”提供了一个跨行业通用的分析语言，“价值迁移”概念尤其精辟，把看似无关的兴衰（瑞士制表、IBM→微软英特尔、美国航空→西南航空）纳入统一逻辑。</li>
+<li><strong>案例密度高、细节扎实</strong>。每个模式都有真实公司、真实数据（市销率、利润率、市值曲线）支撑，实操指导性在同期商业书中少见，且每章末尾附“问题清单”便于自查。</li>
+<li><strong>强调“以客户为中心”和“客户经济系统”具有前瞻性</strong>，预见了后来的平台经济、解决方案经济、订阅/重复收入模式；第8章“配电盘”、第10章“利润乘数”、第13章“标准”几乎预演了互联网时代的商业逻辑。</li>
+<li><strong>诚实记录了大量失败案例</strong>（新可乐、巴黎迪士尼、VisiCorp、斯沃琪电信），没有把创新者写成常胜将军。</li>
+</ul>
+<h3>局限</h3>
+<ul class="points">
+<li><strong>案例时效性弱</strong>。成书数据截至 1996—1997 年、序言落款 2002 年，如今重读，多数主角的企业设计已被时代改写（柯达式固守、诺基亚的“目标锁定”、微软自身的反垄断困境、迪士尼乐园巴黎早已扭亏、戴尔崛起又让位于云计算），是张“1990 年代快照”。</li>
+<li><strong>幸存者偏差</strong>。入选的多为最终赢家，对失败企业如何“发现利润区却错过”讨论不足；且案例集中于大公司/明星创始人，对中小企业如何低成本起步着墨较少。</li>
+<li><strong>理论深度偏浅</strong>。22 种盈利模式多为一页纸速览，未给出量化的选择边界；四要素框架偏描述性，缺乏可证伪的因果识别，容易被任意套用。</li>
+<li><strong>隐含的美国中心与乐观主义</strong>。暗含“市场最终奖赏创新者、资本会重新配置”的乐观假设，对制度、监管、反垄断、宏观周期的权重估计偏低；部分论断（如“每隔 5 年必须重塑”）是经验性提炼而非铁律。</li>
+</ul>
+<h3>适合 / 不适合的读者</h3>
+<ul class="points">
+<li><strong>适合</strong>：MBA/商科学生、战略与咨询从业者、正在做商业模式创新或转型的业务负责人、对“价值迁移/平台/标准/解决方案”等概念感兴趣的读者；尤其适合被“唯增长论/唯份额论”绑架的决策者。</li>
+<li><strong>不适合</strong>：寻找严格学术理论或量化模型的读者；需要即插即用、当下（AI 与平台时代）落地工具的读者——需自行把 1990 年代模式映射到新语境。</li>
+</ul>
+<h3>互为补充 / 对照的书</h3>
+<ul class="points">
+<li>《创新者的窘境》（克莱顿·克里斯坦森）：本书讲“如何主动创新进入利润区”，那本讲“为何优秀企业会被破坏性创新颠覆”，两者互补，正好覆盖“创新者视角”与“被颠覆者视角”。</li>
+<li>《蓝海战略》（钱·金、勒妮·莫博涅）：同样强调价值创新与客户价值，但更聚焦“同时差异化与低成本、重构市场边界”，可与本书“产品金字塔/解决方案”模式对照。</li>
+<li>《价值迁移》（本书作者斯莱沃斯基的另一著作）：理论更系统深入，是本书的进阶。</li>
+<li>《平台革命》《平台经济》（Geoffrey Parker 等）：把第 8 章“配电盘”模式放到互联网平台语境中深化。</li>
+<li>《创新者的解答》（哈默与钱皮恩）：同样主张“打破旧假设、重构企业设计”，方法论更实操，可与本书案例互为印证。</li>
+<li>《好战略，坏战略》（理查德·鲁梅尔特）：补足本书在“战略如何诊断与取舍”上的理论深度。</li>
+</ul>
+    </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<footer>
+  <div class="mark">发现利润区</div>
+  发现利润区 · 读书笔记 · 生成于 2026
+</footer>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const links = document.querySelectorAll('.toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) map[id] = a;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map[e.target.id];
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+
+</body>
+</html>
